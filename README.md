@@ -2,10 +2,6 @@
 ## Version 2025.04
 ## for the Arduino Mega 2560 Rev3
 
-https://github.com/DavesThinkTank/Star-Trek-2025/releases/tag/v2025.04
-
-NOTE!: Please check out the latest release at the link above. Subsequent releases have additional features. The program will display the version number for four seconds when the pinball is turned on, in the Player 1 display (2025) and the Credit window (04). If it doesn't, you have the wrong software or the wrong version!
-
 Re-imagined rules for Bally's 1979 Star Trek pinball machine. Implemented using the Retro Pin Upgrade (RPU), using a daughter card connected to the MPU's J5 connector. The card can be built yourself using instructions available online. I did not build mine myself and so cannot really advise you. The link to the original instructions is gone, but copies occasionally pop up online.
 
 A safer option is to purchase a kit, or even a pre-built card. Both are available at:
