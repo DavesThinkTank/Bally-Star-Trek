@@ -19,7 +19,8 @@ Note: This link is to a different game, NOT the Bally Star Trek. I will update w
 * Download Arduino's IDE (Integrated Development Environment). And pay them a few bucks!
 * Find ST2025p04.ino in your ST2025p04 folder, and open it with the Arduino IDE. Compile and upload to an Arduino Mega 2560 microcontroller.
 * Attach the Arduino 2560 microcontroller, as part of the daughter card from above, to the J5 connector of your Flash Gordon pinball's MPU board.
-* Unzip the sound files and transfer them to the micro SD card on your WAVTrigger.
+* Sound files can be found at https://drive.google.com/drive/folders/175rKGxsXPs678i7x1qTePkK48J6tJLC7?usp=sharing 
+* Copy and transfer the sound files to the micro SD card on your WAVTrigger.
 
 ### Adjustments on first startup
 Be sure to review all self-test game settings as they may have defaulted to zero. See the included manual for a complete description of all settings.
