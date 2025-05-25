@@ -1537,7 +1537,8 @@ int BallOver(boolean curStateChanged) {
   // if we have remaining ball saves, and we're under the time limit, then save the ball
   if ((BallSaveUsed[CurrentPlayer] > 0) && (CurrentTime < (BallSaveStartTime + ballSaveNumMS)) && !PlayerShootsAgain) {
     BallSaveUsed[CurrentPlayer]--;
-    RPU_SetLampState(LA_SAME_PLAYER_SHOOTS_AGAIN, 0);
+    RPU_SetLampState(LA_SAME_PLAYER_SHOOTS_AGAIN, 1);
+    RPU_SetLampState(LA_SHOOT_AGAIN, 1);
     PlayerShootsAgain = true;
     CurrentScores[CurrentPlayer] = InitialScore;
     PlaySound(VoiceBallSave, 500);
@@ -1546,12 +1547,25 @@ int BallOver(boolean curStateChanged) {
     // if we have remaining ball saves, and we're under the score limit, then save the ball
   else if ((BallSaveUsed[CurrentPlayer] > 0) && (CurrentScores[CurrentPlayer] < InitialScore + ballSaveScore) && !PlayerShootsAgain) {
     BallSaveUsed[CurrentPlayer]--;
-    RPU_SetLampState(LA_SAME_PLAYER_SHOOTS_AGAIN, 0);
+    RPU_SetLampState(LA_SAME_PLAYER_SHOOTS_AGAIN, 1);
+    RPU_SetLampState(LA_SHOOT_AGAIN, 1);
     PlayerShootsAgain = true;
     CurrentScores[CurrentPlayer] = InitialScore;
     PlaySound(VoiceBallSave, 500);
     ballSavePlayed = true;
   }
+
+  if (ScoreAwardStates[CurrentPlayer] >= 2 && MiniGamePlayed[CurrentPlayer] == 0) { // In case threshold passed with saved ball and mini-game not awarded
+    RPU_SetLampState(LA_SAME_PLAYER_SHOOTS_AGAIN, 1);
+    RPU_SetLampState(LA_SHOOT_AGAIN, 1);
+    PlayerShootsAgain = true;
+  }
+  if (ScoreAwardStates[CurrentPlayer] >= 3 && MiniGamePlayed[CurrentPlayer] == 1) { // In case threshold passed with saved ball and mini-game not awarded
+    RPU_SetLampState(LA_SAME_PLAYER_SHOOTS_AGAIN, 1);
+    RPU_SetLampState(LA_SHOOT_AGAIN, 1);
+    PlayerShootsAgain = true;
+  }
+
   if (PlayerShootsAgain) {
     returnState = MACHINE_STATE_INIT_NEW_BALL;
   } else {
@@ -2350,15 +2364,15 @@ int RunGamePlayMode(int curState, boolean curStateChanged) {
 
   if (CurrentScores[CurrentPlayer]>=ScoreAward1 && ScoreAward1 > 0 && ScoreAwardStates[CurrentPlayer]==0) { // Threshold Level 1 Award
     ScoreAwardStates[CurrentPlayer] = 1;
-    if (dipThresholdAward == 1 || (dipThresholdAward == 2 && PlayerShootsAgain))
+    if (dipThresholdAward == 1 || (dipThresholdAward == 2 && PlayerShootsAgain))                            // Points
       AddToScore(25000, true);
-    else if (dipThresholdAward == 2) { // Extra Ball
+    else if (dipThresholdAward == 2) {                                                                      // Extra Ball
       SPSATurnedOff = true;
       PlayerShootsAgain = true;
       RPU_SetLampState(LA_SHOOT_AGAIN, 1);
       RPU_SetLampState(LA_SAME_PLAYER_SHOOTS_AGAIN, 1);
     }
-    else if (dipThresholdAward == 3) { // One Credit
+    else if (dipThresholdAward == 3) {                                                                      // Game Credit
     My_PushToTimedSolenoidStack(SO_KNOCKER, 3, CurrentTime, true);
     AddCredit(0, CreditsperCoin[0], CoinsperCredit[0], 1);
     // if (!dipUnlimitedReplays) FreeGameCollected[CurrentPlayer] = true;
@@ -2369,6 +2383,8 @@ int RunGamePlayMode(int curState, boolean curStateChanged) {
   if (CurrentScores[CurrentPlayer]>=ScoreAward2 && ScoreAward2 > 0 && ScoreAwardStates[CurrentPlayer]==1) { // Mini-Game 1
     ScoreAwardStates[CurrentPlayer] = 2;
     SPSATurnedOff = true;
+    if (PlayerShootsAgain) // Passed threshold with player shoots again, 25000 points awarded to compensate because we are using it for mini-game
+      AddToScore(25000);
     PlayerShootsAgain = true;
     RPU_SetLampState(LA_SHOOT_AGAIN, 1);
     RPU_SetLampState(LA_SAME_PLAYER_SHOOTS_AGAIN, 1);
@@ -2376,6 +2392,8 @@ int RunGamePlayMode(int curState, boolean curStateChanged) {
   if (CurrentScores[CurrentPlayer]>=ScoreAward3 && ScoreAward3 > 0 && ScoreAwardStates[CurrentPlayer]==2 && MiniGamePlayed[CurrentPlayer]==1) { // Mini-Game 2
     ScoreAwardStates[CurrentPlayer] = 3;
     SPSATurnedOff = true;
+    if (PlayerShootsAgain) // Passed threshold with player shoots again, 25000 points awarded to compensate because we are using it for mini-game
+      AddToScore(25000);
     PlayerShootsAgain = true;
     RPU_SetLampState(LA_SHOOT_AGAIN, 1);
     RPU_SetLampState(LA_SAME_PLAYER_SHOOTS_AGAIN, 1);
