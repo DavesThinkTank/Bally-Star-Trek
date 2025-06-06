@@ -5,9 +5,7 @@
 Re-imagined rules for Bally's 1979 Star Trek pinball machine. Implemented using the Retro Pin Upgrade (RPU), using a daughter card connected to the MPU's J5 connector. The card can be built yourself using instructions available online. I did not build mine myself and so cannot really advise you. The link to the original instructions is gone, but copies occasionally pop up online.
 
 A safer option is to purchase a kit, or even a pre-built card. Both are available at:
-https://pinside.com/pinball/shops/shop/1304-roygbev-pinball/13139-concord2022-with-new-sounds-complete-kit
-
-Note: This link is to a different game, NOT the Bally Star Trek. I will update when an Arduino is made available with the Bally Star Trek 2025 software. For now, you must obtain and upload my GitHub software.
+https://pinside.com/pinball/shops/shop/1304-roygbev-pinball/13777-star-trek-arduino-upgrade-with-new-rules-and-sounds
 
 ### To use this code (more complete information is available in the manual):
 * Download this zip file (Code > Download ZIP) or clone the repository to your hard drive.
