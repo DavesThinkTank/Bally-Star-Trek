@@ -520,8 +520,8 @@ byte SoundTimings[256][2] = {
 
 // *** Sound File Groups. First value is number of files in group:
 
-byte BackgroundMusic[8] = {7, 181, 182, 183, 184, 185, 186, 187};
-// byte BackgroundMusic[8] = {7, 181, 181, 181, 181, 181, 181, 181}; // Use if only bridge sounds available
+// byte BackgroundMusic[8] = {7, 181, 182, 183, 184, 185, 186, 187};
+byte BackgroundMusic[8] = {7, 181, 181, 181, 181, 181, 181, 181}; // Use if only bridge sounds available
 byte VoiceStartup[4] = {3, 31, 51, 53};
 byte VoiceBridge[8] = {7, 52, 61, 65, 122, 123, 133, 135};
 byte VoiceFun[4] = {3, 25, 55, 124};
@@ -561,8 +561,8 @@ byte SFXChime100   = 9;   // 100 chime
 byte SFXChime1000  = 10;  // 1000 chime
 byte SFXAddPlayer  = 56;  // Transporter
 
-byte BGMiniGame1   = 189; // Music for mini-game 1
-byte BGMiniGame2   = 190; // Music for mini-game 2
-// byte BGMiniGame1   = 181; // Music for mini-game 1 // Use if only bridge sounds available
-// byte BGMiniGame2   = 181; // Music for mini-game 2 // Use if only bridge sounds available
+// byte BGMiniGame1   = 189; // Music for mini-game 1
+// byte BGMiniGame2   = 190; // Music for mini-game 2
+byte BGMiniGame1   = 181; // Music for mini-game 1 // Use if only bridge sounds available
+byte BGMiniGame2   = 181; // Music for mini-game 2 // Use if only bridge sounds available
 byte BGTest        = 181; // Used in self-test volume control
