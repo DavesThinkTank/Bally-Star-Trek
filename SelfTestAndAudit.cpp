@@ -59,6 +59,11 @@ Version 2025.01 by Dave's Think Tank
   - Removed references to RPU_OS_USE_GEETEOH (BSOS_OS_USE_GEETEOH). RPU_OS_USE_GEETEOH is now defined in FGyyyypmm.ino as a user definition, where it belongs.
   - Solenoid / Switch test would "detect" self test switch hit on first solenoid. Fixed.
 
+Version 2025.06 by Dave's Think Tank
+
+- Lamp self-test has been extended to include six light shows from the game - photon torpedoes, phasers, Enterprise explosions, mini-game winner lights,
+    Enterprise computer "Working..." (match), attract mode lights.
+
  */
 
 #include <Arduino.h>
@@ -95,6 +100,7 @@ byte holdDisplay = 0;
 boolean SoundPlayed = false;
 byte SoundPlaying = 0;
 byte SoundToPlay = 0;
+byte LightShow = 0;
 boolean SolenoidCycle = true;
 boolean SolenoidOn = true;
 
@@ -181,8 +187,26 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
       CurValue = 99;
       RPU_SetDisplay(0, CurValue, true);
       LastSolTestTime = CurrentTime;
+      LightShow = 0;
     }
-    if (curSwitch==resetSwitch || resetDoubleClick || (ResetHold && CurrentTime > LastSolTestTime + 250)) {
+    if (curSwitch == otherSwitch) {
+      LightShow += 1;
+      if (LightShow > 6) LightShow = 0; // Light displays numbered zero through 6
+      returnState = 20000 + LightShow;
+      RPU_TurnOffAllLamps();
+      if (LightShow == 0) {
+        CurValue = 99;
+        RPU_SetDisplay(0, CurValue, true);
+        for (int count=0; count<RPU_MAX_LAMPS; count++) {
+          RPU_SetLampState(count, 1, 0, 500);
+        }
+      }
+    }
+    else if (curSwitch==resetSwitch && LightShow > 0) {
+      RPU_TurnOffAllLamps();
+      returnState = 20000 + LightShow;
+    }
+    else if (LightShow == 0 && (curSwitch==resetSwitch || resetDoubleClick || (ResetHold && CurrentTime > LastSolTestTime + 250))) {
       LastSolTestTime = CurrentTime;
       CurValue += 1;
       if (CurValue>99) CurValue = 0;
@@ -196,7 +220,7 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
         RPU_SetLampState(CurValue, 1, 0, 0);
       }      
       RPU_SetDisplay(0, CurValue, true);  
-    }    
+    }
   } else if (curState==MACHINE_STATE_TEST_DISPLAYS) { //                                                  *** Test Displays ***
     if (curStateChanged) {
       RPU_TurnOffAllLamps();
@@ -207,6 +231,7 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
       }
       CurValue = 0;
       LastSolTestTime = CurrentTime;
+      LightShow = 0;
     }
     if (curSwitch==resetSwitch || resetDoubleClick || (ResetHold && CurrentTime > LastSolTestTime + 250)) {
       CurValue += 1;
@@ -216,7 +241,7 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
       #else
         if (CurValue>30) CurValue = 0;
       #endif
-    }    
+    }
     RPU_CycleAllDisplays(CurrentTime, CurValue);
   } else if (curState==MACHINE_STATE_TEST_SOLENOIDS) { //                                                 *** Test Solenoids ***
     if (curStateChanged) {

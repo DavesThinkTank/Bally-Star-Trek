@@ -1,17 +1,17 @@
 # Bally Star Trek 2025
-## Version 2025.04
+## Version 2025.06
 ## for the Arduino Mega 2560 Rev3
 
-Re-imagined rules for Bally's 1979 Star Trek pinball machine. Implemented using the Retro Pin Upgrade (RPU), using a daughter card connected to the MPU's J5 connector. The card can be built yourself using instructions available online. The following website can help you with this: https://www.pinballrefresh.com/retro-pin-upgrade-rpu 
+Re-imagined rules for Bally's 1979 Star Trek pinball machine. Implemented using the Retro Pin Upgrade (RPU), using a daughter card connected to the MPU's J5 connector. The card can be built yourself using instructions available online. The following website can help you with this: 
+https://www.pinballrefresh.com/retro-pin-upgrade-rpu
 
-An easier option is to purchase a kit, or even a pre-built card. Both are available at:
-https://pinside.com/pinball/shops/shop/1304-roygbev-pinball/13777-star-trek-arduino-upgrade-with-new-rules-and-sounds
+An easier option is to purchase a kit, or even a pre-built card. Both are available at: https://pinside.com/pinball/shops/shop/1304-roygbev-pinball/13777-star-trek-arduino-upgrade-with-new-rules-and-sounds
 
 ### To use this code (more complete information is available in the manual):
 * Download this zip file (Code > Download ZIP) or clone the repository to your hard drive.
-* Unzip the ST2025p04 repository and make sure the parent folder is named: ST2025p04
+* Unzip the ST2025p06 repository and make sure the parent folder is named: ST2025p06
 * Download Arduino's IDE (Integrated Development Environment). And pay them a few bucks!
-* Find ST2025p04.ino in your ST2025p04 folder, and open it with the Arduino IDE. Compile and upload to an Arduino Mega 2560 microcontroller.
+* Find ST2025p06.ino in your ST2025p06 folder, and open it with the Arduino IDE. Compile and upload to an Arduino Mega 2560 microcontroller.
 * Attach the Arduino 2560 microcontroller, as part of the daughter card from above, to the J5 connector of your Flash Gordon pinball's MPU board.
 * Sound files can be found at https://drive.google.com/drive/folders/175rKGxsXPs678i7x1qTePkK48J6tJLC7?usp=sharing 
 * Copy and transfer the sound files to the micro SD card on your WAVTrigger.
@@ -21,7 +21,7 @@ Be sure to review all self-test game settings as they may have defaulted to zero
 
 ### How to operate self-test / audit / game settings
 - Inner coin door button: Enters self-test / audit mode and advances through sections
-- Outer coin door game button: Can be used to control and direct some tests. See the included file StarTrek2025-04manual.pdf for a full explanation of the self-tests and game settings available.
+- Outer coin door game button: Can be used to control and direct some tests. See the included file StarTrek2025-xxmanual.pdf for a full explanation of the self-tests and game settings available.
 - Coin 3 inner door switch: Some tests require the use of the right-most coin drop switch to modify or move between values. See the included manual for more information.
 - Slam switch: The slam switch is located on the inside of the game door. It can be used to end a self-test session without going through all the tests. See the manual for more information.
 
@@ -127,3 +127,15 @@ Be sure to review all self-test game settings as they may have defaulted to zero
 ### Bug Fixes:
 - High scores of a million or more are now maintained, and displayed in the 6-digit displays(!) Previously, your score simply started over again
   at zero.
+
+
+### Version 2025.06 by Dave's Think Tank
+
+### Changes / Additions:
+- Light show added to Enterprise explosions and mini-game winners in Mini Games 1 and 2
+- Lamp self-test has been extended to include six light shows from the game - photon torpedoes, phasers, Enterprise explosions, mini-game winner lights,
+    Enterprise computer "Working..." (match), attract mode lights
+
+
+### Bug Fixes:
+- Under some circumstances, B, A, L, L, or Y scored during photn torpedoes was being displayed at the switch but not in the middle BALLY lights.
