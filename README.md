@@ -138,4 +138,4 @@ Be sure to review all self-test game settings as they may have defaulted to zero
 
 
 ### Bug Fixes:
-- Under some circumstances, B, A, L, L, or Y scored during photn torpedoes was being displayed at the switch but not in the middle BALLY lights.
+- Under some circumstances, B, A, L, L, or Y scored during photon torpedoes was being displayed at the switch but not in the middle BALLY lights.
