@@ -2,7 +2,9 @@
 ## Version 2025.06
 ## for the Arduino Mega 2560 Rev3
 
-Re-imagined rules for Bally's 1979 Star Trek pinball machine. Implemented using the Retro Pin Upgrade (RPU), using a daughter card connected to the MPU's J5 connector. The card can be built yourself using instructions available online. The following website can help you with this:
+Re-imagined rules for Bally's 1979 Star Trek pinball machine. All new sounds, light displays, and two new one-ball mini games! The same game you love, but so much more! 
+
+Implemented using the Retro Pin Upgrade (RPU), using a daughter card connected to the MPU's J5 connector and a WAV Trigger sound board. The card can be built yourself using instructions available online. The following website can help you with this:
 https://www.pinballrefresh.com/retro-pin-upgrade-rpu
 
 An easier option is to purchase a kit, or even a pre-built card. Both are available at: https://pinside.com/pinball/shops/shop/1304-roygbev-pinball/13777-star-trek-arduino-upgrade-with-new-rules-and-sounds
