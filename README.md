@@ -1,19 +1,17 @@
 # Bally Star Trek 2025
-## Version 2025.06
+## Version 2025.09
 ## for the Arduino Mega 2560 Rev3
 
-Re-imagined rules for Bally's 1979 Star Trek pinball machine. All new sounds, light displays, and two new one-ball mini games! The same game you love, but so much more! 
-
-Implemented using the Retro Pin Upgrade (RPU), using a daughter card connected to the MPU's J5 connector and a WAV Trigger sound board. The card can be built yourself using instructions available online. The following website can help you with this:
+Re-imagined rules for Bally's 1979 Star Trek pinball machine. Implemented using the Retro Pin Upgrade (RPU), using a daughter card connected to the MPU's J5 connector. The card can be built yourself using instructions available online. The following website can help you with this: 
 https://www.pinballrefresh.com/retro-pin-upgrade-rpu
 
 An easier option is to purchase a kit, or even a pre-built card. Both are available at: https://pinside.com/pinball/shops/shop/1304-roygbev-pinball/13777-star-trek-arduino-upgrade-with-new-rules-and-sounds
 
 ### To use this code (more complete information is available in the manual):
 * Download this zip file (Code > Download ZIP) or clone the repository to your hard drive.
-* Unzip the ST2025p06 repository and make sure the parent folder is named: ST2025p06
-* Download Arduino's IDE (Integrated Development Environment). And pay them a few bucks!
-* Find ST2025p06.ino in your ST2025p06 folder, and open it with the Arduino IDE. Compile and upload to an Arduino Mega 2560 microcontroller.
+* Unzip the ST2025p09 repository and make sure the parent folder is named: ST2025p09
+* Download Arduino's IDE (Integrated Development Environment) from https://www.arduino.cc/en/software. And pay them a few bucks!
+* Find ST2025p09.ino in your ST2025p09 folder, and open it with the Arduino IDE. Compile and upload to an Arduino Mega 2560 microcontroller.
 * Attach the Arduino 2560 microcontroller, as part of the daughter card from above, to the J5 connector of your Flash Gordon pinball's MPU board.
 * Sound files can be found at https://drive.google.com/drive/folders/175rKGxsXPs678i7x1qTePkK48J6tJLC7?usp=sharing 
 * Copy and transfer the sound files to the micro SD card on your WAVTrigger.
@@ -28,6 +26,29 @@ Be sure to review all self-test game settings as they may have defaulted to zero
 - Slam switch: The slam switch is located on the inside of the game door. It can be used to end a self-test session without going through all the tests. See the manual for more information.
 
 ### Version History
+### Version 2025.09 by Dave's Think Tank
+
+Changes / Additions:
+- Coin lockout and K1 flipper relay have been added to the solenoid self-test.
+- Slingshot sound changed to transporter, at regular volume.
+- Reduced gain on "Fire all phasers" to sfx gain.
+- Self-destruct timer starts at 60 when mini-game begins (rather than blank for 1.7 seconds). Flashes when game ends, to give you some sense of how you did.
+- When bonus scored, points awarded will flash in the credit window. Since bonus ladder used for light show, this allows you to know how many points were won.
+- When BALLY scored, points awarded will flash in the credit window. No reason, other than consistency with the bonus score!
+
+
+### Version 2025.06 by Dave's Think Tank
+
+### Changes / Additions:
+- Light show added to Enterprise explosions and mini-game winners in Mini Games 1 and 2
+- Lamp self-test has been extended to include six light shows from the game - photon torpedoes, phasers, Enterprise explosions, mini-game winner lights,
+    Enterprise computer "Working..." (match), attract mode lights
+
+
+### Bug Fixes:
+- Under some circumstances, B, A, L, L, or Y scored during photon torpedoes was being displayed at the switch but not in the middle BALLY lights.
+
+
 ### Version 2025.04 by Dave's Think Tank
 
 ### Documentation of the Project:
@@ -129,15 +150,3 @@ Be sure to review all self-test game settings as they may have defaulted to zero
 ### Bug Fixes:
 - High scores of a million or more are now maintained, and displayed in the 6-digit displays(!) Previously, your score simply started over again
   at zero.
-
-
-### Version 2025.06 by Dave's Think Tank
-
-### Changes / Additions:
-- Light show added to Enterprise explosions and mini-game winners in Mini Games 1 and 2
-- Lamp self-test has been extended to include six light shows from the game - photon torpedoes, phasers, Enterprise explosions, mini-game winner lights,
-    Enterprise computer "Working..." (match), attract mode lights
-
-
-### Bug Fixes:
-- Under some circumstances, B, A, L, L, or Y scored during photon torpedoes was being displayed at the switch but not in the middle BALLY lights.

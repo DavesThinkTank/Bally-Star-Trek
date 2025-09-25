@@ -21,6 +21,10 @@
 
     - Wrote three functions to allow flashing of a single digit: RPU_SetDigitFlash, RPU_SetDigitFlashCredits, and RPU_SetDigitFlashBallInPlay.
     - RPU_ReadByteFromEEProm sets value to zero if it equals 255! Removed, allowing byte = 255.
+
+    Version 2025.09 by Dave's Think Tank
+
+    - Fixed RPU_SetDisplayFlashCredits()
  */
 
 
@@ -1833,9 +1837,9 @@ void RPU_SetDisplayFlash(int displayNumber, unsigned long value, unsigned long c
 void RPU_SetDisplayFlashCredits(unsigned long curTime, int period) {
   if (period) {
     if ((curTime/period)%2) {
-      DisplayDigitEnable[4] |= 0x06;
+      DisplayDigitEnable[4] |= 6;
     } else {
-      DisplayDigitEnable[4] &= 0x39;
+      DisplayDigitEnable[4] &= 255 - 6;
     }
   }
 }

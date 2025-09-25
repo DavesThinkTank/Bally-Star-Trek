@@ -18,51 +18,55 @@
     See <https://www.gnu.org/licenses/>.
 
 
-  Version 2024.04 by Dave's Think Tank
+  Version FG2024.04 by Dave's Think Tank
 
   - Features were added to the Self-Test function:
   - Sound test, changed to allow cycling through all sounds. Features using game button allow skipping sounds, repeating sounds, fast forward through sounds.
   - Added options in self test for all accounting values to be increased, as well as zeroed.
 
-  Version 2024.07 by Dave's Think Tank
+  Version FG2024.07 by Dave's Think Tank
 
   - Switch Test: Added count of switches set to "On", in credit display.
   - Switch Test: Double-click on credit button resets all drop targets. FLASH GORDON SPECIFIC CODE!
   - These changes to switch test allow a user to impliment a switch-matrix test, by setting multiple switches and looking for incorrect totals.
 
-  Version 2024.08 by Dave's Think Tank
+  Version FG2024.08 by Dave's Think Tank
 
   - Self-test modification: Added use of slam switch to end self-test. Added otherSwitch as a secondary input to self-tests.
   - DIP Switch Test: Added a test for DIP switches. Dip switch banks are displayed in binary (7 digits per display, plus one in ball-in-play or credit window.) 
   - DIP switches can be temporarily changed in game, using otherSwitch (described above).
 
-  Version 2024.09 by Dave's Think Tank
+  Version FG2024.09 by Dave's Think Tank
 
   - Added "Reset Hold" feature to tests for lights, displays, and DIP switches. Reset Hold scrolls quickly through the display / review options.
   - Reset Hold option on audit settings sped up considerably.
   - Solenoids can be made to stop firing during solenoid test by pressing otherSwitch (Coin slot 3 switch).
   - endSwitch fixed so that it will register as a switch in switch test, and NOT end self-test mode.
 
-  Version 2024.11 by Dave's Think Tank
+  Version FG2024.11 by Dave's Think Tank
 
   - Added monitoring of switches to solenoid test, to warn if vibration from a solenoid is setting off a switch
 
-Version 2024.12 by Dave's Think Tank
+Version FG2024.12 by Dave's Think Tank
 
   - When the solenoid test identifies a switch set off by vibration, it will also note the time in milliseconds between the solenoid firing and the switch activating
   - Cleaned up code by removing old, unused CPC (coins per credit) code.
 
-Version 2025.01 by Dave's Think Tank
+Version FG2025.01 by Dave's Think Tank
 
   - New double-hit switch bounce test added, in addition to the stuck switch / switch matrix test.
   - Converted from BSOS (Bally/Stern Operating System) to RPU (Retro Pin Upgrade). RPU is an extension of BSOS. BSOS is no longer maintained.
   - Removed references to RPU_OS_USE_GEETEOH (BSOS_OS_USE_GEETEOH). RPU_OS_USE_GEETEOH is now defined in FGyyyypmm.ino as a user definition, where it belongs.
   - Solenoid / Switch test would "detect" self test switch hit on first solenoid. Fixed.
 
-Version 2025.06 by Dave's Think Tank
+Version ST2025.06 by Dave's Think Tank
 
 - Lamp self-test has been extended to include six light shows from the game - photon torpedoes, phasers, Enterprise explosions, mini-game winner lights,
     Enterprise computer "Working..." (match), attract mode lights.
+
+Version ST2025.09 by Dave's Think Tank
+
+- Added coin lockout and K1 flipper enable to solenoid test.
 
  */
 
@@ -103,6 +107,8 @@ byte SoundToPlay = 0;
 byte LightShow = 0;
 boolean SolenoidCycle = true;
 boolean SolenoidOn = true;
+boolean coinLockoutOn;
+boolean flippersOn;
 
 
 int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long CurrentTime, byte resetSwitch, byte otherSwitch, byte endSwitch) {
@@ -249,7 +255,8 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
       LastSolTestTime = CurrentTime;
       SolSwitchTimer = CurrentTime;
       RPU_EnableSolenoidStack(); 
-      RPU_SetDisableFlippers(false);
+      RPU_SetDisableFlippers(flippersOn = true);
+      RPU_SetCoinLockout(coinLockoutOn = true);
       RPU_SetDisplayBlank(4, 0);
       RPU_SetDisplayBallInPlay(3);
       SolenoidCycle = true;
@@ -271,12 +278,17 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
     if ((CurrentTime-LastSolTestTime)>1000) {
       if (SolenoidCycle) {
         SavedValue += 1;
-        if (SavedValue>14) SavedValue = 0;
+        if (SavedValue>15) SavedValue = 0;
       }
       if (SolenoidOn) {
-        RPU_PushToSolenoidStack(SavedValue, 5);
         SolSwitchTimer = CurrentTime;
-      }
+        if (SavedValue <= 13)
+          RPU_PushToSolenoidStack(SavedValue, 5);
+        else if (SavedValue == 14)
+          RPU_SetCoinLockout(coinLockoutOn = !coinLockoutOn);
+        else
+          RPU_SetDisableFlippers(flippersOn = !flippersOn);
+        }
       RPU_SetDisplay(0, SavedValue, true);
       LastSolTestTime = CurrentTime;
     }
@@ -285,7 +297,7 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
     if (curStateChanged) {
       RPU_TurnOffAllLamps();
       RPU_DisableSolenoidStack(); // switches will not activate solenoids!
-      RPU_SetDisableFlippers(true);
+      RPU_SetDisableFlippers(false);
       RPU_SetDisplayCredits(0);
       RPU_SetDisplayBallInPlay(4);
     }

@@ -18,20 +18,20 @@
     See <https://www.gnu.org/licenses/>.
 
 
-    Version 2024.04 by Dave's Think Tank
+    Version FG2024.04 by Dave's Think Tank
 
     - Minor changes to ensure appropriate function in a Flash Gordon.
 
-     Version 2024.08 by Dave's Think Tank
+     Version FG2024.08 by Dave's Think Tank
 
   - Added otherSwitch as a secondary input to self-tests. Changed slamSwitch to endSwitch.
   - DIP Switch Test: Added a test for DIP switches (-6). 
 
-    Version 2024.12 by Dave's Think Tank
+    Version FG2024.12 by Dave's Think Tank
 
     - Cleaned up code by removing old, unused CPC (coins per credit) code, unused GetAwardScore() function definition.
 
-Version 2025.01 by Dave's Think Tank
+Version FG2025.01 by Dave's Think Tank
 
     - Added test for switch bounce (-5), in addition to stuck switches (-4).
 
