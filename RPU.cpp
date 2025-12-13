@@ -17,18 +17,27 @@
 
     See <https://www.gnu.org/licenses/>.
 
-    Version 2025.01 by Dave's Think Tank
+    Version FG2025.01 by Dave's Think Tank
 
     - Wrote three functions to allow flashing of a single digit: RPU_SetDigitFlash, RPU_SetDigitFlashCredits, and RPU_SetDigitFlashBallInPlay.
     - RPU_ReadByteFromEEProm sets value to zero if it equals 255! Removed, allowing byte = 255.
 
-    Version 2025.09 by Dave's Think Tank
+    Version FG2025.10 by Dave's Think Tank
 
-    - Fixed RPU_SetDisplayFlashCredits()
+    - Revised to allow the function RPU_SetLampState() to control strobe lamps (e.g., Flash Gordon). The variables RPU_STROBE_LAMP and RPU_STROBE_TYPE must be
+      set in RPU_Config.h.
+    - The function RPU_SetLampState() allows you to dim the lamps. Four levels are available: 0 (full brightness), 1, 2, or 3. Testing has shown that levels 2 
+      and 3 do not work well with LED lamps. The function has been modified to ensure the dimming level never exceeds 1 for LEDs. LED or incendescent lights 
+      are now specified by defining or not defining the variable RPU_USE_LED in RPU_Config.h (down about 80 lines).
+    - Fixed RPU_SetDisplayFlashCredits() to flash correct two digits.
+
+    Version ST2025.10 by Dave's Think Tank
+
+    - Added blankByMagnitude and minDigits to RPU_SetDigitFlash() (one of my subroutines at the bottom).
+    - Added RPU_SwitchCount() to return number of switches in stack, as part of effort to avoid an error where all switches fire at once
+
  */
 
-
- 
 #include <Arduino.h>
 #include <EEPROM.h>
 #define RPU_CPP_FILE
@@ -47,6 +56,8 @@
  *   RPU_Config.h file. 
  */
 #include "RPU_Config.h"
+
+
 
 
 /******************************************************
@@ -475,8 +486,19 @@ void RPU_DataWrite(int address, byte data) {
   PORTA = ((address & 0x3FC0)>>6); // A6-A13
   PORTC = (PORTC & 0x3F) | ((address & 0x4000)>>7) | ((address & 0x8000)>>9); // A14-A15
 
-  // Wait for a falling edge of the clock
-  while((PINE & 0x20));
+  // Wait for a falling edge of the clock (original code)
+  // while((PINE & 0x20));
+  // Replaced with the following:
+
+  // Wait until clock is high and then
+  // move on after falling edge
+  while (!(PINE & 0x20));
+  while ( (PINE & 0x20));
+
+// this code is intended to fail
+// while (!(PINE & 0x20));
+// while ( (PINE & 0x20));
+// __builtin_avr_delay_cycles(23); // (32 is a full clock cycle)
 
   // Pulse VMA over one clock cycle
   // Set VMA ON
@@ -1837,9 +1859,9 @@ void RPU_SetDisplayFlash(int displayNumber, unsigned long value, unsigned long c
 void RPU_SetDisplayFlashCredits(unsigned long curTime, int period) {
   if (period) {
     if ((curTime/period)%2) {
-      DisplayDigitEnable[4] |= 6;
+      DisplayDigitEnable[4] |= RPU_OS_MASK_SHIFT_2; // Mask for credit display
     } else {
-      DisplayDigitEnable[4] &= 255 - 6;
+      DisplayDigitEnable[4] &= RPU_OS_MASK_SHIFT_1; // Mask for ball-in-play display
     }
   }
 }
@@ -1939,6 +1961,27 @@ byte BitShiftValues[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
 
 void RPU_SetLampState(int lampNum, byte s_lampState, byte s_lampDim, int s_lampFlashPeriod) {
   if (lampNum>=RPU_MAX_LAMPS || lampNum<0) return;
+
+  #ifdef RPU_USE_LED
+  s_lampDim = min(s_lampDim, 1); // dimming of LEDs works very poorly for levels 2 and 3
+  #endif
+
+  #ifdef RPU_STROBE_LAMP
+  if (lampNum == RPU_STROBE_LAMP) {
+    if (RPU_STROBE_TYPE <= 1) {
+      s_lampState = RPU_STROBE_TYPE; // Always off, or always on. No dimming, no strobing.
+      s_lampDim = 0;
+      s_lampFlashPeriod = 0;
+    }
+    else if (RPU_STROBE_TYPE == 2) { // Xenon strobe lamps have on/off reversed. No dimming.
+      s_lampState = !s_lampState;
+      s_lampDim = 0;
+    }
+    else if (RPU_STROBE_TYPE == 4 && s_lampFlashPeriod == 0) // Reverse on/off signal, unless it is flashing. If flashing with other lamps, the signal must flash together.
+      s_lampState = !s_lampState; 
+  }
+  #endif
+
   byte lampRow = lampNum%8;
   byte lampCol = lampNum/8;
   byte lampBit = BitShiftValues[lampRow];
@@ -3794,15 +3837,23 @@ unsigned long RPU_InitializeMPU(unsigned long initOptions, byte creditResetSwitc
 /********************************** Addons from Dave's Think Tank **********************************/
 
 // Dave's Think Tank - Set a single digit to flash
-void RPU_SetDigitFlash(int displayNumber, int digitNumber, unsigned long value, unsigned long curTime, int period) {
-  // A period of zero toggles display every other time
+void RPU_SetDigitFlash(int displayNumber, int digitNumber, unsigned long value, unsigned long curTime, int period, boolean blankByMagnitude, byte minDigits) {
+
+  if (minDigits < digitNumber + 1) minDigits = digitNumber + 1;
+  byte blank = 0;
+
+  for (int count=0; count<RPU_OS_NUM_DIGITS; count++) {
+    blank = blank * 2;
+    if (value!=0 || count<minDigits || !blankByMagnitude) blank |= 1;
+    value /= 10;
+  }
+
   if (period) {
     if ((curTime/period)%2) {
-      DisplayDigitEnable[displayNumber] = 63;
+      DisplayDigitEnable[displayNumber] = blank;
     } else {
-      DisplayDigitEnable[displayNumber] = 63 - (32 >> digitNumber);
+      DisplayDigitEnable[displayNumber] = blank - (1 << (RPU_OS_NUM_DIGITS - 1) >> digitNumber);
     }
-    // BSOS_SetDisplay(displayNumber, value, false, 7);
   }
 }
 
@@ -3813,7 +3864,7 @@ void RPU_SetDigitFlashCredits(int digit, unsigned long curTime, int period) {
     if ((curTime/period)%2) {
       DisplayDigitEnable[4] = 108>>1;
     } else {
-      DisplayDigitEnable[4] = (108 - (8 - digit * 4))>>1;
+      DisplayDigitEnable[4] = (108 - (8 - digit * 4))>>1; // NOTE: Calculation for 7-digit display, then shifted 1
     }
   }
 }
@@ -3825,29 +3876,29 @@ void RPU_SetDigitFlashBallInPlay(int digit, unsigned long curTime, int period) {
     if ((curTime/period)%2) {
       DisplayDigitEnable[4] = 108>>1;
     } else {
-      DisplayDigitEnable[4] = (108 - (64 - digit * 32))>>1;
+      DisplayDigitEnable[4] = (108 - (64 - digit * 32))>>1; // NOTE: Calculation for 7-digit display, then shifted 1
     }
   }
 }
 
 // Dave's Think Tank - Clear the switch stack
 void RPU_ClearSwitches() {
-  // Reset solenoid stack
-  SolenoidStackFirst = 0;
-  SolenoidStackLast = 0;
-
   // Reset switch stack
   SwitchStackFirst = 0;
   SwitchStackLast = 0;
-
-  // Reset all the switch values 
-  // (set them as closed so that if they're stuck they don't register as new events)
-  byte switchCount;
-  for (switchCount=0; switchCount<NUM_SWITCH_BYTES; switchCount++) {
-    SwitchesMinus2[switchCount] = 0xFF;
-    SwitchesMinus1[switchCount] = 0xFF;
-    SwitchesNow[switchCount] = 0xFF;
-  }
+  
+  // Replace bad switch byte reads with most recent good reads
+  for (byte switchCount = 0; switchCount < NUM_SWITCH_BYTES; switchCount++)
+    SwitchesNow[switchCount] = SwitchesMinus1[switchCount];
+  
+  // Reset solenoid stack, to stop immediate solenoids triggered by erroneous switches.
+  SolenoidStackFirst = 0;
+  SolenoidStackLast = 0;
 }
 
-
+// Dave's Think Tank - Return count of switches in stack
+byte RPU_SwitchCount() {
+  if (SwitchStackLast >= SwitchStackFirst) 
+    return (SwitchStackLast - SwitchStackFirst);
+  return (SWITCH_STACK_SIZE + SwitchStackLast - SwitchStackFirst);
+}

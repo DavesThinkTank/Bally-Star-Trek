@@ -64,10 +64,14 @@ Version ST2025.06 by Dave's Think Tank
 - Lamp self-test has been extended to include six light shows from the game - photon torpedoes, phasers, Enterprise explosions, mini-game winner lights,
     Enterprise computer "Working..." (match), attract mode lights.
 
-Version ST2025.09 by Dave's Think Tank
+Version FG2025.10 by Dave's Think Tank
 
-- Added coin lockout and K1 flipper enable to solenoid test.
+  - Added control over strobe lights
+  - Added coin lockout and K1 flipper enable to solenoid test
 
+Version ST2025.10 by Dave's Think Tank
+
+- Added ability to modify score values one digit at a time.
  */
 
 #include <Arduino.h>
@@ -84,6 +88,7 @@ unsigned long DisplayDIP[6];
 unsigned long LastSolTestTime = 0; 
 unsigned long LastSelfTestChange = 0;
 unsigned long SavedValue = 0;
+unsigned long xValue = 0;
 unsigned long SolSwitchTimer = 0;
 unsigned long ResetHold = 0;
 unsigned long otherHold = 0;
@@ -91,6 +96,7 @@ unsigned long NextSpeedyValueChange = 0;
 unsigned long NumSpeedyChanges = 0;
 unsigned long LastResetPress = 0;
 unsigned long LastOtherPress = 0;
+unsigned long TensVal = 1;
 
 unsigned long SwitchTimer = 0;
 byte HoldSwitch = SW_SELF_TEST_SWITCH;
@@ -278,16 +284,17 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
     if ((CurrentTime-LastSolTestTime)>1000) {
       if (SolenoidCycle) {
         SavedValue += 1;
-        if (SavedValue>15) SavedValue = 0;
+        if (SavedValue > RPU_FLIPPER_ENABLE) SavedValue = 0;           // RPU_FLIPPER_ENABLE is the highest solenoid
       }
       if (SolenoidOn) {
         SolSwitchTimer = CurrentTime;
-        if (SavedValue <= 13)
-          RPU_PushToSolenoidStack(SavedValue, 5);
-        else if (SavedValue == 14)
+        
+        if (SavedValue == RPU_COIN_LOCKOUT)                            // Test coin lockout
           RPU_SetCoinLockout(coinLockoutOn = !coinLockoutOn);
-        else
+        else if (SavedValue == RPU_FLIPPER_ENABLE)                     // Test flipper enable
           RPU_SetDisableFlippers(flippersOn = !flippersOn);
+        else
+          RPU_PushToSolenoidStack(SavedValue, 5);
         }
       RPU_SetDisplay(0, SavedValue, true);
       LastSolTestTime = CurrentTime;
@@ -398,7 +405,7 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
           RPU_PushToSoundStack(soundToPlay*256, 8);
         #elif defined (RPU_OS_USE_WTYPE_2_SOUND)
           RPU_PushToSoundStack(SoundToPlay, 8);
-        #elif defined (RPU_OS_USE_WAV_TRIGGER)
+        #elif defined(RPU_OS_USE_WAV_TRIGGER) || defined(RPU_OS_USE_WAV_TRIGGER_1p3)
           returnState = 10000 + SoundToPlay;          // Main program has all the info to play sounds using WAV Trigger!
         #endif
         
@@ -497,7 +504,7 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
     savedScoreStartByte = RPU_AWARD_SCORE_3_EEPROM_START_BYTE;
   } else if (curState==MACHINE_STATE_TEST_HISCR) { //                                                     *** Set High Score ***
     savedScoreStartByte = RPU_HIGHSCORE_EEPROM_START_BYTE;
-    } else if (curState==MACHINE_STATE_TEST_PERSONAL_GOAL) {
+    } else if (curState==MACHINE_STATE_TEST_PERSONAL_GOAL) { //                                           *** Set Personal Goal ***
     savedScoreStartByte = RPU_PERSONAL_GOAL_EEPROM_START_BYTE;
   } else if (curState==MACHINE_STATE_TEST_CREDITS) { //                                                   *** Set Credits ***
     if (curStateChanged) {
@@ -527,38 +534,88 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
     auditNumStartByte = RPU_CHUTE_3_COINS_START_BYTE;    
   } 
 
+  /************* Update a (large) score value ************/
+
   if (savedScoreStartByte) {
     if (curStateChanged) {
       SavedValue = RPU_ReadULFromEEProm(savedScoreStartByte);
-      RPU_SetDisplay(0, SavedValue, true);  
+      RPU_SetDisplay(0, SavedValue, true);
+      CurDigit = 0;
     }
-
-    if (curSwitch==resetSwitch) {
-      SavedValue += 1000;
-      RPU_SetDisplay(0, SavedValue, true);  
-      RPU_WriteULToEEProm(savedScoreStartByte, SavedValue);
-    }
-
-    if (resetBeingHeld && (CurrentTime>=NextSpeedyValueChange)) {
-      SavedValue += 1000;
-      RPU_SetDisplay(0, SavedValue, true);  
-      if (NumSpeedyChanges<6) NextSpeedyValueChange = CurrentTime + 400;
-      else if (NumSpeedyChanges<50) NextSpeedyValueChange = CurrentTime + 50;
-      else NextSpeedyValueChange = CurrentTime + 10;
-      NumSpeedyChanges += 1;
-    }
-
-    if (!resetBeingHeld && NumSpeedyChanges>0) {
-      RPU_WriteULToEEProm(savedScoreStartByte, SavedValue);
-      NumSpeedyChanges = 0;
-    }
-    
-    if (resetDoubleClick) {
-      SavedValue = 0;
-      RPU_SetDisplay(0, SavedValue, true);  
-      RPU_WriteULToEEProm(savedScoreStartByte, SavedValue);
+    if (CurDigit == 0) {                // Increase by 1000 with increasing speed
+      if (curSwitch==resetSwitch) {
+        SavedValue += 1000;
+        RPU_SetDisplay(0, SavedValue, true);  
+        RPU_WriteULToEEProm(savedScoreStartByte, SavedValue);
+      }
+      if (resetBeingHeld && (CurrentTime>=NextSpeedyValueChange)) {
+        SavedValue += 1000;
+        RPU_SetDisplay(0, SavedValue, true);  
+        if (NumSpeedyChanges<6) NextSpeedyValueChange = CurrentTime + 400;
+        else if (NumSpeedyChanges<50) NextSpeedyValueChange = CurrentTime + 50;
+        else NextSpeedyValueChange = CurrentTime + 10;
+        NumSpeedyChanges += 1;
+      }
+      if (!resetBeingHeld && NumSpeedyChanges>0) {
+        RPU_WriteULToEEProm(savedScoreStartByte, SavedValue);
+        NumSpeedyChanges = 0;
+      }
+      if (resetDoubleClick) {
+        SavedValue = 0;
+        RPU_SetDisplay(0, SavedValue, true);  
+        RPU_WriteULToEEProm(savedScoreStartByte, SavedValue);
+      }
+      if (curSwitch == otherSwitch) {
+        CurDigit = 1;
+        TensVal = 10;
+        xValue = SavedValue;
+        CurValue = (SavedValue / TensVal) % 10;
+        LastSolTestTime = CurrentTime;
+      }
+    } else {                            // Increase one digit at a time
+      RPU_SetDigitFlash(0, CurDigit < RPU_OS_NUM_DIGITS ? CurDigit : RPU_OS_NUM_DIGITS - 1, xValue, CurrentTime, 250, true, 1);
+      if (curSwitch == otherSwitch) {
+        CurDigit += 1;
+        if (CurDigit > 8) otherDoubleClick = true; // Maximum 9 digits in unsigned long; return to other loop
+        TensVal *= 10;
+        CurValue = (SavedValue / TensVal) % 10;
+        if (CurDigit < RPU_OS_NUM_DIGITS) {
+          xValue = SavedValue;
+          RPU_SetDisplay(0, xValue, true, 1 + CurDigit);
+        }
+        else {
+          xValue = SavedValue;
+          for (byte count = RPU_OS_NUM_DIGITS; count <= CurDigit; ++count) {
+            xValue /= 10;
+          }
+          RPU_SetDisplay(0, xValue, true, RPU_OS_NUM_DIGITS);
+        }
+      }
+      if (curSwitch == resetSwitch || (ResetHold && CurrentTime > LastSolTestTime + 500)) {
+        LastSolTestTime = CurrentTime;
+        if (++CurValue > 9) CurValue = 0;
+        SavedValue = SavedValue - TensVal * ((SavedValue / TensVal) % 10) + TensVal * CurValue;
+        RPU_WriteULToEEProm(savedScoreStartByte, SavedValue);
+        if (CurDigit < RPU_OS_NUM_DIGITS) {
+          xValue = SavedValue;
+          RPU_SetDisplay(0, xValue, true, 1 + CurDigit);
+        }
+        else {
+          xValue = SavedValue;
+          for (byte count = RPU_OS_NUM_DIGITS; count <= CurDigit; ++count) {
+            xValue /= 10;
+          }
+          RPU_SetDisplay(0, xValue, true, RPU_OS_NUM_DIGITS);
+        }
+      }
+      if (otherDoubleClick) {
+        CurDigit = 0;
+        RPU_SetDisplay(0, SavedValue, true);
+      }
     }
   }
+
+  /************* Update a (smaller) audit number value ************/
 
   if (auditNumStartByte) {
     if (curStateChanged) {

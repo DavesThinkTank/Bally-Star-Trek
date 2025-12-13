@@ -31,7 +31,7 @@
 
     - Cleaned up code by removing old, unused CPC (coins per credit) code, unused GetAwardScore() function definition.
 
-Version FG2025.01 by Dave's Think Tank
+    Version FG2025.01 by Dave's Think Tank
 
     - Added test for switch bounce (-5), in addition to stuck switches (-4).
 
