@@ -3093,7 +3093,7 @@ int CountdownBonus(boolean curStateChanged) {
     RPU_SetLampState(LA_BALL_IN_PLAY, 1, 0, 250);
     PhotonsDone = false;
   }
-  if (WTWaitingTime > CurrentTime && !PhotonsDone) {
+  if (WTWaitingTime > CurrentTime || PhotonLightShow || PhaserLightShow) {
     FirePhotonTorpedoes(); // (In case this is still running from normal game play)
     FireAllPhasers();
     CountingDisplay(CurrentPlayer, CurrentScores[CurrentPlayer], true, 2);
