@@ -44,6 +44,7 @@ Changes / Additions:
 Bug Fixes:
 - The code was not using RPU_OS_USE_WAV_TRIGGER or RPU_OS_USE_WAV_TRIGGER_1p3 appropriately. It was basically set up to always use 1p3. Fixed.
 - If a mini-game score was zero, the ball number would not advance. Fixed.
+- If skill shot made with the A or B lane, and BALLY completed, and the ball ends before the skill shot fanfare ends, the photon torpedoes would not fire.
 - A rare error, but one known to have occured in many Arduino pinballs, will cause all switches to fire simultaneously, causing problems during 
   attract mode, or sometimes during a game. Code has been added to capture these errors before they can cause any disruption.
 
