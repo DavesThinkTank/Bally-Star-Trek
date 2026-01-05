@@ -176,3 +176,17 @@ Bug Fixes:
 - A rare error, but one known to have occured in many Arduino pinballs, will cause all switches to fire simultaneously, causing problems during 
   attract mode, or sometimes during a game. Code has been added to capture these errors before they can cause any disruption.
 */
+
+
+/**************************************************************************
+
+Version 2025.12 by Dave's Think Tank
+
+Changes / Additions:
+- I have been told that it is an expected function of pinball machines that, if you press the game button during ball 2 of a game or later, the 
+  game will end. I have implemented this. Pressing the game button will end your game, and send you into Attract Mode.
+- You can now get into Kids' Mode by turning on the machine while holding the game button. Be sure to wait for the Kid Ming laugh.
+- You can still switch between regular and Kids' Mode by pressing the game button and the coin slot 3 switch at the same time, during Attract mode. 
+  However, it will no longer automatically put you into a game.
+
+*/

@@ -1,5 +1,5 @@
 # Bally Star Trek 2025
-## Version 2025.10
+## Version 2025.12
 ## for the Arduino Mega 2560 Rev3
 
 Re-imagined rules for Bally's 1979 Star Trek pinball machine. Implemented using the Retro Pin Upgrade (RPU), using a daughter card connected to the MPU's J5 connector. The card can be built yourself using instructions available online. The following website can help you with this: 
@@ -9,9 +9,9 @@ An easier option is to purchase a kit, or even a pre-built card. Both are availa
 
 ### To use this code (more complete information is available in the manual):
 * Download this zip file (Code > Download ZIP) or clone the repository to your hard drive.
-* Unzip the ST2025p10 repository and make sure the parent folder is named: ST2025p10
+* Unzip the ST2025p12 repository and make sure the parent folder is named: ST2025p12
 * Download Arduino's IDE (Integrated Development Environment) from https://www.arduino.cc/en/software. And pay them a few bucks!
-* Find ST2025p10.ino in your ST2025p10 folder, and open it with the Arduino IDE. Compile and upload to an Arduino Mega 2560 microcontroller.
+* Find ST2025p12.ino in your ST2025p12 folder, and open it with the Arduino IDE. Compile and upload to an Arduino Mega 2560 microcontroller.
 * Attach the Arduino 2560 microcontroller, as part of the daughter card from above, to the J5 connector of your Flash Gordon pinball's MPU board.
 * Sound files can be found at https://drive.google.com/drive/folders/175rKGxsXPs678i7x1qTePkK48J6tJLC7?usp=sharing 
 * Copy and transfer the sound files to the micro SD card on your WAVTrigger.
@@ -26,6 +26,15 @@ Be sure to review all self-test game settings as they may have defaulted to zero
 - Slam switch: The slam switch is located on the inside of the game door. It can be used to end a self-test session without going through all the tests. See the manual for more information.
 
 ### Version History
+### Version 2025.12 by Dave's Think Tank
+
+Changes / Additions:
+- I have been told that it is an expected function of pinball machines that, if you press the game button during ball 2 of a game or later, the 
+  game will end. I have implemented this. Pressing the game button will end your game, and send you into Attract Mode.
+- You can now get into Kids' Mode by turning on the machine while holding the game button. Be sure to wait for the Kid Ming laugh.
+- You can still switch between regular and Kids' Mode by pressing the game button and the coin slot 3 switch at the same time, during Attract mode. 
+  However, it will no longer automatically put you into a game.
+
 ### Version 2025.10 by Dave's Think Tank
 
 Rule Change:
