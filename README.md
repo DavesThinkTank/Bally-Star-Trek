@@ -1,5 +1,5 @@
-# Bally Star Trek 2025
-## Version 2025.12
+# Bally Star Trek 2026
+## Version 2026.02
 ## for the Arduino Mega 2560 Rev3
 
 Re-imagined rules for Bally's 1979 Star Trek pinball machine. Implemented using the Retro Pin Upgrade (RPU), using a daughter card connected to the MPU's J5 connector. The card can be built yourself using instructions available online. The following website can help you with this: 
@@ -9,9 +9,9 @@ An easier option is to purchase a kit, or even a pre-built card. Both are availa
 
 ### To use this code (more complete information is available in the manual):
 * Download this zip file (Code > Download ZIP) or clone the repository to your hard drive.
-* Unzip the ST2025p12 repository and make sure the parent folder is named: ST2025p12
+* Unzip the ST2026p02 repository and make sure the parent folder is named: ST2026p02
 * Download Arduino's IDE (Integrated Development Environment) from https://www.arduino.cc/en/software. And pay them a few bucks!
-* Find ST2025p12.ino in your ST2025p12 folder, and open it with the Arduino IDE. Compile and upload to an Arduino Mega 2560 microcontroller.
+* Find ST2026p02.ino in your ST2026p02 folder, and open it with the Arduino IDE. Compile and upload to an Arduino Mega 2560 microcontroller.
 * Attach the Arduino 2560 microcontroller, as part of the daughter card from above, to the J5 connector of your Flash Gordon pinball's MPU board.
 * Sound files can be found at https://drive.google.com/drive/folders/175rKGxsXPs678i7x1qTePkK48J6tJLC7?usp=sharing 
 * Copy and transfer the sound files to the micro SD card on your WAVTrigger.
@@ -21,11 +21,39 @@ Be sure to review all self-test game settings as they may have defaulted to zero
 
 ### How to operate self-test / audit / game settings
 - Inner coin door button: Enters self-test / audit mode and advances through sections
-- Outer coin door game button: Can be used to control and direct some tests. See the included file StarTrek2025-xxmanual.pdf for a full explanation of the self-tests and game settings available.
+- Outer coin door game button: Can be used to control and direct some tests. See the included file StarTrek2026-02manual.pdf for a full explanation of the self-tests and game settings available.
 - Coin 3 inner door switch: Some tests require the use of the right-most coin drop switch to modify or move between values. See the included manual for more information.
 - Slam switch: The slam switch is located on the inside of the game door. It can be used to end a self-test session without going through all the tests. See the manual for more information.
 
 ### Version History
+### Version 2026.02 by Dave's Think Tank
+
+Rule Change:
+- A new one-ball challenge game has been added, based on the Kobayashi Maru test! There are now three one-ball challenges, which are activated by passing the three reward levels 
+    set in the self-tests. If DIP switches 14 and 15 are set for an extra ball then completing each challenge will result in same player shoots again. 
+
+Changes / Additions:
+- Number of pushes (strength / length of time) for outhole increased from 4 to 5.
+- Display test modified to allow showing only the value eight. Assists in finding missing segments, dim segments, burnt segments.
+- Instructions for handling music files have been added to the Operator Game Adjustments.
+
+Bug Fixes:
+- Coin chute 2, coins per credit was always set to 1. Not true if set equal to chute 1 and chute 1 coins per credit not equal to 1. Fixed.
+- Timing of concurrent solenoid firings reviewed, some minor modifications.
+
+### Version 2026.01 by Dave's Think Tank
+
+Changes / Additions:
+- Tried to use RPU_InitializeMPU to read game switch, but didn't seem to work.
+- If in match mode, can no longer cancel game by pressing the game switch. Prevents impatient players from accidentally ending game before match awards.
+
+Bug Fixes:
+- BadSwitches: Fixed so that error data written in credit and match windows cannot be written over until attract mode ends. Removed unnecessary overwriting 
+    lines from scrolling display code.
+- SW_SAUCER during attract mode handled when switch hit, rather than while switch closed. Should ensure BadSwitches does not repeatedly pop the saucer.
+  - Needed to add code to Setup() to add SW_SAUCER to switch stack if ball in saucer when machine turned on.
+- SW_SAUCER during tilt modified to avoid solenoid activation more than once during ball bounce in saucer.
+
 ### Version 2025.12 by Dave's Think Tank
 
 Changes / Additions:

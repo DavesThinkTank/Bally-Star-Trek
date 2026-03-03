@@ -72,6 +72,11 @@ Version FG2025.10 by Dave's Think Tank
 Version ST2025.10 by Dave's Think Tank
 
 - Added ability to modify score values one digit at a time.
+
+Version ST2026.02 by Dave's Think Tank
+
+- Extended cycling of displays to allow cycling displays with value 8 only.
+
  */
 
 #include <Arduino.h>
@@ -79,13 +84,13 @@ Version ST2025.10 by Dave's Think Tank
 #include "RPU_Config.h"
 #include "RPU.h"
 
-#define MACHINE_STATE_ATTRACT         0
+#define MACHINE_STATE_ATTRACT 0
 //#define USE_SB100
 
 byte dipBankVal[4];
 unsigned long DisplayDIP[6];
 
-unsigned long LastSolTestTime = 0; 
+unsigned long LastSolTestTime = 0;
 unsigned long LastSelfTestChange = 0;
 unsigned long SavedValue = 0;
 unsigned long xValue = 0;
@@ -115,6 +120,7 @@ boolean SolenoidCycle = true;
 boolean SolenoidOn = true;
 boolean coinLockoutOn;
 boolean flippersOn;
+boolean display8s;
 
 
 int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long CurrentTime, byte resetSwitch, byte otherSwitch, byte endSwitch) {
@@ -130,70 +136,70 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
   unsigned short savedScoreStartByte = 0;
   unsigned short auditNumStartByte = 0;
 
-  if (curSwitch==resetSwitch) {
+  if (curSwitch == resetSwitch) {
     ResetHold = CurrentTime;
-    if ((CurrentTime-LastResetPress)<400) {
+    if ((CurrentTime - LastResetPress) < 400) {
       resetDoubleClick = true;
       curSwitch = SWITCH_STACK_EMPTY;
     }
     LastResetPress = CurrentTime;
   }
 
-  if (curSwitch==otherSwitch) {
+  if (curSwitch == otherSwitch) {
     otherHold = CurrentTime;
-    if ((CurrentTime-LastOtherPress)<400) {
+    if ((CurrentTime - LastOtherPress) < 400) {
       otherDoubleClick = true;
       curSwitch = SWITCH_STACK_EMPTY;
     }
     LastOtherPress = CurrentTime;
   }
 
-  if (ResetHold!=0 && !RPU_ReadSingleSwitchState(resetSwitch)) {
+  if (ResetHold != 0 && !RPU_ReadSingleSwitchState(resetSwitch)) {
     ResetHold = 0;
     NextSpeedyValueChange = 0;
   }
 
   boolean resetBeingHeld = false;
-  if (ResetHold!=0 && (CurrentTime-ResetHold)>1300) {
+  if (ResetHold != 0 && (CurrentTime - ResetHold) > 1300) {
     resetBeingHeld = true;
-    if (NextSpeedyValueChange==0) {
+    if (NextSpeedyValueChange == 0) {
       NextSpeedyValueChange = CurrentTime;
       NumSpeedyChanges = 0;
     }
   }
 
-  if ((curSwitch==endSwitch) && (curState != MACHINE_STATE_TEST_STUCK_SWITCHES)) {
+  if ((curSwitch == endSwitch) && (curState != MACHINE_STATE_TEST_STUCK_SWITCHES)) {
     return MACHINE_STATE_ATTRACT;
   }
-  
-  if (curSwitch==SW_SELF_TEST_SWITCH && (CurrentTime-LastSelfTestChange)>250) {
+
+  if (curSwitch == SW_SELF_TEST_SWITCH && (CurrentTime - LastSelfTestChange) > 250) {
     returnState -= 1;
-//    if (returnState==MACHINE_STATE_TEST_DONE) returnState = MACHINE_STATE_ATTRACT;
+    //    if (returnState==MACHINE_STATE_TEST_DONE) returnState = MACHINE_STATE_ATTRACT;
     LastSelfTestChange = CurrentTime;
   }
 
   if (curStateChanged) {
-//    RPU_SetCoinLockout(false);
-    
-    for (int count=0; count<4; count++) {
+    //    RPU_SetCoinLockout(false);
+
+    for (int count = 0; count < 4; count++) {
       RPU_SetDisplay(count, 0);
-      RPU_SetDisplayBlank(count, 0x00);        
+      RPU_SetDisplayBlank(count, 0x00);
     }
 
-    if (curState<=MACHINE_STATE_TEST_SCORE_LEVEL_1) {
-      RPU_SetDisplayCredits(MACHINE_STATE_TEST_DIP_SWITCHES-curState);
+    if (curState <= MACHINE_STATE_TEST_SCORE_LEVEL_1) {
+      RPU_SetDisplayCredits(MACHINE_STATE_TEST_DIP_SWITCHES - curState);
       RPU_SetDisplayBallInPlay(0, false);
     }
   }
 
-  if (curState==MACHINE_STATE_TEST_LAMPS) { //                                                            *** Test Lamps ***
+  if (curState == MACHINE_STATE_TEST_LAMPS) {  //                                                            *** Test Lamps ***
     if (curStateChanged) {
-      RPU_DisableSolenoidStack();        
+      RPU_DisableSolenoidStack();
       RPU_SetDisableFlippers(true);
       RPU_SetDisplayCredits(0);
       RPU_SetDisplayBallInPlay(1);
       RPU_TurnOffAllLamps();
-      for (int count=0; count<RPU_MAX_LAMPS; count++) {
+      for (int count = 0; count < RPU_MAX_LAMPS; count++) {
         RPU_SetLampState(count, 1, 0, 500);
       }
       CurValue = 99;
@@ -203,64 +209,64 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
     }
     if (curSwitch == otherSwitch) {
       LightShow += 1;
-      if (LightShow > 6) LightShow = 0; // Light displays numbered zero through 6
+      if (LightShow > 6) LightShow = 0;  // Light displays numbered zero through 6
       returnState = 20000 + LightShow;
       RPU_TurnOffAllLamps();
       if (LightShow == 0) {
         CurValue = 99;
         RPU_SetDisplay(0, CurValue, true);
-        for (int count=0; count<RPU_MAX_LAMPS; count++) {
+        for (int count = 0; count < RPU_MAX_LAMPS; count++) {
           RPU_SetLampState(count, 1, 0, 500);
         }
       }
-    }
-    else if (curSwitch==resetSwitch && LightShow > 0) {
+    } else if (curSwitch == resetSwitch && LightShow > 0) {
       RPU_TurnOffAllLamps();
       returnState = 20000 + LightShow;
-    }
-    else if (LightShow == 0 && (curSwitch==resetSwitch || resetDoubleClick || (ResetHold && CurrentTime > LastSolTestTime + 250))) {
+    } else if (LightShow == 0 && (curSwitch == resetSwitch || resetDoubleClick || (ResetHold && CurrentTime > LastSolTestTime + 250))) {
       LastSolTestTime = CurrentTime;
       CurValue += 1;
-      if (CurValue>99) CurValue = 0;
-      if (CurValue==RPU_MAX_LAMPS) {
+      if (CurValue > 99) CurValue = 0;
+      if (CurValue == RPU_MAX_LAMPS) {
         CurValue = 99;
-        for (int count=0; count<RPU_MAX_LAMPS; count++) {
+        for (int count = 0; count < RPU_MAX_LAMPS; count++) {
           RPU_SetLampState(count, 1, 0, 500);
         }
       } else {
         RPU_TurnOffAllLamps();
         RPU_SetLampState(CurValue, 1, 0, 0);
-      }      
-      RPU_SetDisplay(0, CurValue, true);  
+      }
+      RPU_SetDisplay(0, CurValue, true);
     }
-  } else if (curState==MACHINE_STATE_TEST_DISPLAYS) { //                                                  *** Test Displays ***
+  } else if (curState == MACHINE_STATE_TEST_DISPLAYS) {  //                                                  *** Test Displays ***
     if (curStateChanged) {
       RPU_TurnOffAllLamps();
       RPU_SetDisplayCredits(0);
       RPU_SetDisplayBallInPlay(2);
-      for (int count=0; count<4; count++) {
-        RPU_SetDisplayBlank(count, 0x3F);        
+      for (int count = 0; count < 4; count++) {
+        RPU_SetDisplayBlank(count, 0x3F);
       }
       CurValue = 0;
       LastSolTestTime = CurrentTime;
       LightShow = 0;
+      display8s = 0;
     }
-    if (curSwitch==resetSwitch || resetDoubleClick || (ResetHold && CurrentTime > LastSolTestTime + 250)) {
+    if (curSwitch == resetSwitch || resetDoubleClick || (ResetHold && CurrentTime > LastSolTestTime + 250)) {
       CurValue += 1;
       LastSolTestTime = CurrentTime;
-      #ifdef RPU_OS_USE_7_DIGIT_DISPLAYS
-        if (CurValue>34) CurValue = 0;
-      #else
-        if (CurValue>30) CurValue = 0;
-      #endif
+#ifdef RPU_OS_USE_7_DIGIT_DISPLAYS
+      if (CurValue > 34) CurValue = 0;
+#else
+      if (CurValue > 30) CurValue = 0;
+#endif
     }
-    RPU_CycleAllDisplays(CurrentTime, CurValue);
-  } else if (curState==MACHINE_STATE_TEST_SOLENOIDS) { //                                                 *** Test Solenoids ***
+    if (curSwitch == otherSwitch) display8s = !display8s;
+    RPU_CycleAllDisplays(CurrentTime, CurValue, display8s);
+  } else if (curState == MACHINE_STATE_TEST_SOLENOIDS) {  //                                                 *** Test Solenoids ***
     if (curStateChanged) {
       RPU_TurnOffAllLamps();
       LastSolTestTime = CurrentTime;
       SolSwitchTimer = CurrentTime;
-      RPU_EnableSolenoidStack(); 
+      RPU_EnableSolenoidStack();
       RPU_SetDisableFlippers(flippersOn = true);
       RPU_SetCoinLockout(coinLockoutOn = true);
       RPU_SetDisplayBlank(4, 0);
@@ -269,87 +275,86 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
       SolenoidOn = true;
       SavedValue = 0;
       RPU_PushToSolenoidStack(SavedValue, 5);
-    } 
-    if (curSwitch==resetSwitch || resetDoubleClick) SolenoidCycle = !SolenoidCycle;
+    }
+    if (curSwitch == resetSwitch || resetDoubleClick) SolenoidCycle = !SolenoidCycle;
     if (curSwitch == otherSwitch) SolenoidOn = !SolenoidOn;
-    if (curSwitch!=resetSwitch && curSwitch != otherSwitch && curSwitch != endSwitch && curSwitch != SWITCH_STACK_EMPTY && curSwitch != SW_SELF_TEST_SWITCH) {
+    if (curSwitch != resetSwitch && curSwitch != otherSwitch && curSwitch != endSwitch && curSwitch != SWITCH_STACK_EMPTY && curSwitch != SW_SELF_TEST_SWITCH) {
       RPU_SetDisplayCredits(curSwitch);
       RPU_SetDisplay(3, CurrentTime - SolSwitchTimer, true, 3);
     }
     if (!SolenoidOn) {
-      RPU_SetDisplayCredits(99, false); // Blank display when solenoids turned off
+      RPU_SetDisplayCredits(99, false);  // Blank display when solenoids turned off
       RPU_SetDisplayBlank(3, 0);
     }
 
-    if ((CurrentTime-LastSolTestTime)>1000) {
+    if ((CurrentTime - LastSolTestTime) > 1000) {
       if (SolenoidCycle) {
         SavedValue += 1;
-        if (SavedValue > RPU_FLIPPER_ENABLE) SavedValue = 0;           // RPU_FLIPPER_ENABLE is the highest solenoid
+        if (SavedValue > RPU_FLIPPER_ENABLE) SavedValue = 0;  // RPU_FLIPPER_ENABLE is the highest solenoid
       }
       if (SolenoidOn) {
         SolSwitchTimer = CurrentTime;
-        
-        if (SavedValue == RPU_COIN_LOCKOUT)                            // Test coin lockout
+
+        if (SavedValue == RPU_COIN_LOCKOUT)  // Test coin lockout
           RPU_SetCoinLockout(coinLockoutOn = !coinLockoutOn);
-        else if (SavedValue == RPU_FLIPPER_ENABLE)                     // Test flipper enable
+        else if (SavedValue == RPU_FLIPPER_ENABLE)  // Test flipper enable
           RPU_SetDisableFlippers(flippersOn = !flippersOn);
         else
           RPU_PushToSolenoidStack(SavedValue, 5);
-        }
+      }
       RPU_SetDisplay(0, SavedValue, true);
       LastSolTestTime = CurrentTime;
     }
-    
-  } else if (curState==MACHINE_STATE_TEST_STUCK_SWITCHES) { //                                                  *** Test Stuck Switches ***
+
+  } else if (curState == MACHINE_STATE_TEST_STUCK_SWITCHES) {  //                                                  *** Test Stuck Switches ***
     if (curStateChanged) {
       RPU_TurnOffAllLamps();
-      RPU_DisableSolenoidStack(); // switches will not activate solenoids!
+      RPU_DisableSolenoidStack();  // switches will not activate solenoids!
       RPU_SetDisableFlippers(false);
       RPU_SetDisplayCredits(0);
       RPU_SetDisplayBallInPlay(4);
     }
 
     byte displayOutput = 0;
-    for (byte switchCount=0; switchCount<40; switchCount++) {
+    for (byte switchCount = 0; switchCount < 40; switchCount++) {
       if (RPU_ReadSingleSwitchState(switchCount)) {
         if (displayOutput < 4) RPU_SetDisplay(displayOutput, switchCount, true);
         displayOutput += 1;
       }
     }
 
-    if (displayOutput<4) {
-      for (int count=displayOutput; count<4; count++) {
+    if (displayOutput < 4) {
+      for (int count = displayOutput; count < 4; count++) {
         RPU_SetDisplayBlank(count, 0x00);
       }
     }
-    RPU_SetDisplayCredits(displayOutput); // Let user know how many switches are on, since max four displayed
-    
-    if (resetDoubleClick) { // Double-click to reset all drop targets. GAME SPECIFIC CODE!
-      RPU_PushToSolenoidStack(13, 5, true); // SO_DTARGET
+    RPU_SetDisplayCredits(displayOutput);  // Let user know how many switches are on, since max four displayed
+
+    if (resetDoubleClick) {                  // Double-click to reset all drop targets. GAME SPECIFIC CODE!
+      RPU_PushToSolenoidStack(13, 5, true);  // SO_DTARGET
     }
-} else if (curState==MACHINE_STATE_TEST_SWITCH_BOUNCE) { //                                                  *** Test for Switch Bounce ***
+  } else if (curState == MACHINE_STATE_TEST_SWITCH_BOUNCE) {  //                                                  *** Test for Switch Bounce ***
     if (curStateChanged) {
       RPU_TurnOffAllLamps();
-      RPU_DisableSolenoidStack(); // switches will not activate solenoids!
+      RPU_DisableSolenoidStack();  // switches will not activate solenoids!
       RPU_SetDisableFlippers(true);
       RPU_SetDisplayCredits(0, false);
       RPU_SetDisplayBallInPlay(5);
 
-      for (int count=0; count<4; count++)
-          RPU_SetDisplayBlank(count, 0x00);
+      for (int count = 0; count < 4; count++)
+        RPU_SetDisplayBlank(count, 0x00);
 
       SwitchTimer = 0;
       HoldSwitch = SW_SELF_TEST_SWITCH;
     }
 
-    
-    if (curSwitch == HoldSwitch && curSwitch != SWITCH_STACK_EMPTY && curSwitch != SW_SELF_TEST_SWITCH && CurrentTime - SwitchTimer < 500) { // double-hit detected on a single switch
+
+    if (curSwitch == HoldSwitch && curSwitch != SWITCH_STACK_EMPTY && curSwitch != SW_SELF_TEST_SWITCH && CurrentTime - SwitchTimer < 500) {  // double-hit detected on a single switch
       RPU_SetDisplay(0, curSwitch, true);
       RPU_SetDisplay(1, CurrentTime - SwitchTimer, true);
       SwitchTimer = CurrentTime;
-    }
-    else {
-      if (curSwitch != SWITCH_STACK_EMPTY && curSwitch != SW_SELF_TEST_SWITCH) { // single switch hit once
+    } else {
+      if (curSwitch != SWITCH_STACK_EMPTY && curSwitch != SW_SELF_TEST_SWITCH) {  // single switch hit once
         RPU_SetDisplay(0, curSwitch, true);
         RPU_SetDisplayBlank(1, 0x00);
         HoldSwitch = curSwitch;
@@ -357,83 +362,81 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
       }
     }
 
-    if (resetDoubleClick) { // Double-click to reset all drop targets. GAME SPECIFIC CODE!
-      RPU_PushToSolenoidStack(13, 5, true); // SO_DTARGET
+    if (resetDoubleClick) {                  // Double-click to reset all drop targets. GAME SPECIFIC CODE!
+      RPU_PushToSolenoidStack(13, 5, true);  // SO_DTARGET
     }
 
-  } else if (curState==MACHINE_STATE_TEST_SOUNDS) { //                                                    *** Test Sounds ***
+  } else if (curState == MACHINE_STATE_TEST_SOUNDS) {  //                                                    *** Test Sounds ***
     if (curStateChanged) {
       // RPU_TurnOffAllLamps();
       RPU_SetDisplayCredits(0);
       RPU_SetDisplayBallInPlay(6);
       SolenoidCycle = true;
-      SoundToPlay = 255; // Start with sound 6. This jumps immediately to sound 7, avoiding the continuous background, then continues up.
+      SoundToPlay = 255;  // Start with sound 6. This jumps immediately to sound 7, avoiding the continuous background, then continues up.
       // RPU_PlaySoundSquawkAndTalk(SoundToPlay);
       SoundPlaying = SoundToPlay;
       SoundPlayed = true;
       // RPU_SetDisplay(0, (unsigned long)SoundToPlay, true);
-      LastSolTestTime = CurrentTime - 5000; // Time the sound started to play (5 seconds ago)
-    } 
+      LastSolTestTime = CurrentTime - 5000;  // Time the sound started to play (5 seconds ago)
+    }
 
     if (resetBeingHeld && (CurrentTime - LastSolTestTime > 250)) {
       SoundToPlay += 1;
       SoundPlayed = false;
-      RPU_SetDisplay(0,(unsigned long) SoundToPlay, true);
+      RPU_SetDisplay(0, (unsigned long)SoundToPlay, true);
       LastSolTestTime = CurrentTime;
       SolenoidCycle = true;
-    }
-    else {
-      if (curSwitch==resetSwitch || resetDoubleClick) {
-        if (CurrentTime - LastSolTestTime <= 500) { // Allow 0.5 seconds to click and move forward without playing sound
-          SoundToPlay +=1;
+    } else {
+      if (curSwitch == resetSwitch || resetDoubleClick) {
+        if (CurrentTime - LastSolTestTime <= 500) {  // Allow 0.5 seconds to click and move forward without playing sound
+          SoundToPlay += 1;
           if (SoundToPlay > 255) SoundToPlay = 0;
           RPU_SetDisplay(0, (unsigned long)SoundToPlay, true);
           LastSolTestTime = CurrentTime - 500;
-          }
-        else {
+        } else {
           SolenoidCycle = !SolenoidCycle;
-          }
         }
+      }
       if ((CurrentTime - LastSolTestTime) >= 500 && !SoundPlayed) {
-        #if   defined (RPU_OS_USE_SB100)
-          RPU_PlaySB100(soundToPlay);
-        #elif defined (RPU_OS_USE_S_AND_T)
-          RPU_PlaySoundSAndT(SoundToPlay);
-        #elif defined (RPU_OS_USE_DASH51)
-          RPU_PlaySoundDash51(soundToPlay);
-        #elif defined (RPU_OS_USE_WTYPE_1_SOUND)
-          RPU_PushToSoundStack(soundToPlay*256, 8);
-        #elif defined (RPU_OS_USE_WTYPE_2_SOUND)
-          RPU_PushToSoundStack(SoundToPlay, 8);
-        #elif defined(RPU_OS_USE_WAV_TRIGGER) || defined(RPU_OS_USE_WAV_TRIGGER_1p3)
-          returnState = 10000 + SoundToPlay;          // Main program has all the info to play sounds using WAV Trigger!
-        #endif
-        
+#if defined(RPU_OS_USE_SB100)
+        RPU_PlaySB100(soundToPlay);
+#elif defined(RPU_OS_USE_S_AND_T)
+        RPU_PlaySoundSAndT(SoundToPlay);
+#elif defined(RPU_OS_USE_DASH51)
+        RPU_PlaySoundDash51(soundToPlay);
+#elif defined(RPU_OS_USE_WTYPE_1_SOUND)
+        RPU_PushToSoundStack(soundToPlay * 256, 8);
+#elif defined(RPU_OS_USE_WTYPE_2_SOUND)
+        RPU_PushToSoundStack(SoundToPlay, 8);
+#elif defined(RPU_OS_USE_WAV_TRIGGER) || defined(RPU_OS_USE_WAV_TRIGGER_1p3)
+        returnState = 10000 + SoundToPlay;  // Main program has all the info to play sounds using WAV Trigger!
+#endif
+
         SoundPlaying = SoundToPlay;
         SoundPlayed = true;
-        }
+      }
       if ((CurrentTime - LastSolTestTime) >= 5000) {
         if (SolenoidCycle) {
           SoundToPlay += 1;
           if (SoundToPlay > 255) SoundToPlay = 0;
-          }
+        }
         LastSolTestTime = CurrentTime;
         SoundPlayed = false;
         RPU_SetDisplay(0, (unsigned long)SoundToPlay, true);
       }
     }
-  } else if (curState==MACHINE_STATE_TEST_DIP_SWITCHES) { //                                              *** Test DIP Switches ***
-    
+  } else if (curState == MACHINE_STATE_TEST_DIP_SWITCHES) {  //                                              *** Test DIP Switches ***
+
     if (curStateChanged) {
       RPU_TurnOffAllLamps();
       RPU_SetDisplayBallInPlay(7);
 
-      for (int i=0; i<4; i++) { // Get four DIP banks from memory, convert to binary display
+      for (int i = 0; i < 4; i++) {  // Get four DIP banks from memory, convert to binary display
         dipBankVal[i] = RPU_ReadByteFromEEProm(RPU_DIP_BANK + i);
 
         DisplayDIP[i] = 0;
         int k = 32;
-        for (int j=0; j<6; ++j) {
+        for (int j = 0; j < 6; ++j) {
           DisplayDIP[i] = 10 * DisplayDIP[i] + ((dipBankVal[i] & k) != 0);
           k = k >> 1;
         }
@@ -447,72 +450,71 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
       holdDisplay = xDisplay = CurDisplay = 0;
       LastSolTestTime = CurrentTime;
     }
-   
-    if (curSwitch==resetSwitch || resetDoubleClick || (ResetHold && CurrentTime > LastSolTestTime + 250)) {
-      if (xDisplay < 4) RPU_SetDisplayBlank(CurDisplay, 127); // Reset previous digit to not flash
-      else RPU_SetDisplayBlank(4, 108>>1);
-      
+
+    if (curSwitch == resetSwitch || resetDoubleClick || (ResetHold && CurrentTime > LastSolTestTime + 250)) {
+      if (xDisplay < 4) RPU_SetDisplayBlank(CurDisplay, 127);  // Reset previous digit to not flash
+      else RPU_SetDisplayBlank(4, 108 >> 1);
+
       CurValue += 1;
-      if (CurValue>=32) CurValue = 0;
+      if (CurValue >= 32) CurValue = 0;
       LastSolTestTime = CurrentTime;
-    }    
+    }
     xDisplay = CurDisplay = CurValue / 8;
     xDigit = CurDigit = CurValue % 8;
 
-    if (CurDigit >= 6) { // Final two digits must be displayed in credit window
-      xDigit = CurDigit - 6; // Digit 0 or 1 of credit window
-      xDisplay = 4; // Credit window
+    if (CurDigit >= 6) {      // Final two digits must be displayed in credit window
+      xDigit = CurDigit - 6;  // Digit 0 or 1 of credit window
+      xDisplay = 4;           // Credit window
     }
-    if (CurDisplay != holdDisplay) { // Credit window reset to match last two digits of current display
+    if (CurDisplay != holdDisplay) {  // Credit window reset to match last two digits of current display
       DisplayDIP[4] = 10 * (0 != (dipBankVal[CurDisplay] & 128)) + (0 != (dipBankVal[CurDisplay] & 64));
       RPU_SetDisplayCredits(DisplayDIP[4], true, true);
       holdDisplay = CurDisplay;
     }
 
-    if (curSwitch == otherSwitch) { // Flip current digit in current display
-      dipBankVal[CurDisplay] = dipBankVal[CurDisplay] ^ (1 << CurDigit); // exclusive or function, reverses current digit
+    if (curSwitch == otherSwitch) {                                       // Flip current digit in current display
+      dipBankVal[CurDisplay] = dipBankVal[CurDisplay] ^ (1 << CurDigit);  // exclusive or function, reverses current digit
       RPU_WriteByteToEEProm(RPU_DIP_BANK + CurDisplay, dipBankVal[CurDisplay]);
 
-      if (xDisplay < 4) { // display value as binary
+      if (xDisplay < 4) {  // display value as binary
         DisplayDIP[CurDisplay] = 0;
         int k = 32;
-        for (int j=0; j<6; ++j) {
+        for (int j = 0; j < 6; ++j) {
           DisplayDIP[CurDisplay] = 10 * DisplayDIP[CurDisplay] + ((dipBankVal[CurDisplay] & k) != 0);
           k = k >> 1;
         }
         RPU_SetDisplay(CurDisplay, DisplayDIP[CurDisplay], false);
-      }
-      else {
-      DisplayDIP[4] = 10 * (0 != (dipBankVal[CurDisplay] & 128)) + (0 != (dipBankVal[CurDisplay] & 64));
-      RPU_SetDisplayCredits(DisplayDIP[4], true, true);
+      } else {
+        DisplayDIP[4] = 10 * (0 != (dipBankVal[CurDisplay] & 128)) + (0 != (dipBankVal[CurDisplay] & 64));
+        RPU_SetDisplayCredits(DisplayDIP[4], true, true);
       }
     }
 
-     if (xDisplay < 4) // set mask for flashing digit
+    if (xDisplay < 4)  // set mask for flashing digit
       RPU_SetDigitFlash(CurDisplay, CurDigit, DisplayDIP[CurDisplay], CurrentTime, 250);
     else
       RPU_SetDigitFlashCredits(xDigit, CurrentTime, 250);
 
-  } else if (curState==MACHINE_STATE_TEST_SCORE_LEVEL_1) { //                                             *** Set Score Level 1 ***
-    #ifdef RPU_OS_USE_S_AND_T
-      RPU_PlaySoundSAndT(5); // Sound off
-      #endif
+  } else if (curState == MACHINE_STATE_TEST_SCORE_LEVEL_1) {  //                                             *** Set Score Level 1 ***
+#ifdef RPU_OS_USE_S_AND_T
+    RPU_PlaySoundSAndT(5);  // Sound off
+#endif
     savedScoreStartByte = RPU_AWARD_SCORE_1_EEPROM_START_BYTE;
-  } else if (curState==MACHINE_STATE_TEST_SCORE_LEVEL_2) { //                                             *** Set Score Level 2 ***
+  } else if (curState == MACHINE_STATE_TEST_SCORE_LEVEL_2) {  //                                             *** Set Score Level 2 ***
     savedScoreStartByte = RPU_AWARD_SCORE_2_EEPROM_START_BYTE;
-  } else if (curState==MACHINE_STATE_TEST_SCORE_LEVEL_3) { //                                             *** Set Score Level 3 ***
+  } else if (curState == MACHINE_STATE_TEST_SCORE_LEVEL_3) {  //                                             *** Set Score Level 3 ***
     savedScoreStartByte = RPU_AWARD_SCORE_3_EEPROM_START_BYTE;
-  } else if (curState==MACHINE_STATE_TEST_HISCR) { //                                                     *** Set High Score ***
+  } else if (curState == MACHINE_STATE_TEST_HISCR) {  //                                                     *** Set High Score ***
     savedScoreStartByte = RPU_HIGHSCORE_EEPROM_START_BYTE;
-    } else if (curState==MACHINE_STATE_TEST_PERSONAL_GOAL) { //                                           *** Set Personal Goal ***
+  } else if (curState == MACHINE_STATE_TEST_PERSONAL_GOAL) {  //                                           *** Set Personal Goal ***
     savedScoreStartByte = RPU_PERSONAL_GOAL_EEPROM_START_BYTE;
-  } else if (curState==MACHINE_STATE_TEST_CREDITS) { //                                                   *** Set Credits ***
+  } else if (curState == MACHINE_STATE_TEST_CREDITS) {  //                                                   *** Set Credits ***
     if (curStateChanged) {
       SavedValue = RPU_ReadByteFromEEProm(RPU_CREDITS_EEPROM_BYTE);
       RPU_SetDisplay(0, SavedValue, true);
       LastSolTestTime = CurrentTime;
     }
-    if (curSwitch==resetSwitch || resetDoubleClick || (ResetHold && CurrentTime > LastSolTestTime + 250)) {
+    if (curSwitch == resetSwitch || resetDoubleClick || (ResetHold && CurrentTime > LastSolTestTime + 250)) {
       SavedValue += 1;
       LastSolTestTime = CurrentTime;
       // if (SavedValue>40) SavedValue = 0;
@@ -520,19 +522,19 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
       RPU_SetDisplay(0, SavedValue, true);
       RPU_WriteByteToEEProm(RPU_CREDITS_EEPROM_BYTE, SavedValue & 0x000000FF);
     }
-  } else if (curState==MACHINE_STATE_TEST_TOTAL_PLAYS) { //                                               *** Set Total Plays ***
+  } else if (curState == MACHINE_STATE_TEST_TOTAL_PLAYS) {  //                                               *** Set Total Plays ***
     auditNumStartByte = RPU_TOTAL_PLAYS_EEPROM_START_BYTE;
-  } else if (curState==MACHINE_STATE_TEST_TOTAL_REPLAYS) { //                                             *** Set Total Replays ***
+  } else if (curState == MACHINE_STATE_TEST_TOTAL_REPLAYS) {  //                                             *** Set Total Replays ***
     auditNumStartByte = RPU_TOTAL_REPLAYS_EEPROM_START_BYTE;
-  } else if (curState==MACHINE_STATE_TEST_HISCR_BEAT) { //                                                *** Set High Scores Won ***
+  } else if (curState == MACHINE_STATE_TEST_HISCR_BEAT) {  //                                                *** Set High Scores Won ***
     auditNumStartByte = RPU_TOTAL_HISCORE_BEATEN_START_BYTE;
-  } else if (curState==MACHINE_STATE_TEST_CHUTE_2_COINS) { //                                             *** Set Chute 2 ***
+  } else if (curState == MACHINE_STATE_TEST_CHUTE_2_COINS) {  //                                             *** Set Chute 2 ***
     auditNumStartByte = RPU_CHUTE_2_COINS_START_BYTE;
-  } else if (curState==MACHINE_STATE_TEST_CHUTE_1_COINS) { //                                             *** Set Chute 1 ***
+  } else if (curState == MACHINE_STATE_TEST_CHUTE_1_COINS) {  //                                             *** Set Chute 1 ***
     auditNumStartByte = RPU_CHUTE_1_COINS_START_BYTE;
-  } else if (curState==MACHINE_STATE_TEST_CHUTE_3_COINS) { //                                             *** Set Chute 3 ***
-    auditNumStartByte = RPU_CHUTE_3_COINS_START_BYTE;    
-  } 
+  } else if (curState == MACHINE_STATE_TEST_CHUTE_3_COINS) {  //                                             *** Set Chute 3 ***
+    auditNumStartByte = RPU_CHUTE_3_COINS_START_BYTE;
+  }
 
   /************* Update a (large) score value ************/
 
@@ -542,27 +544,27 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
       RPU_SetDisplay(0, SavedValue, true);
       CurDigit = 0;
     }
-    if (CurDigit == 0) {                // Increase by 1000 with increasing speed
-      if (curSwitch==resetSwitch) {
+    if (CurDigit == 0) {  // Increase by 1000 with increasing speed
+      if (curSwitch == resetSwitch) {
         SavedValue += 1000;
-        RPU_SetDisplay(0, SavedValue, true);  
+        RPU_SetDisplay(0, SavedValue, true);
         RPU_WriteULToEEProm(savedScoreStartByte, SavedValue);
       }
-      if (resetBeingHeld && (CurrentTime>=NextSpeedyValueChange)) {
+      if (resetBeingHeld && (CurrentTime >= NextSpeedyValueChange)) {
         SavedValue += 1000;
-        RPU_SetDisplay(0, SavedValue, true);  
-        if (NumSpeedyChanges<6) NextSpeedyValueChange = CurrentTime + 400;
-        else if (NumSpeedyChanges<50) NextSpeedyValueChange = CurrentTime + 50;
+        RPU_SetDisplay(0, SavedValue, true);
+        if (NumSpeedyChanges < 6) NextSpeedyValueChange = CurrentTime + 400;
+        else if (NumSpeedyChanges < 50) NextSpeedyValueChange = CurrentTime + 50;
         else NextSpeedyValueChange = CurrentTime + 10;
         NumSpeedyChanges += 1;
       }
-      if (!resetBeingHeld && NumSpeedyChanges>0) {
+      if (!resetBeingHeld && NumSpeedyChanges > 0) {
         RPU_WriteULToEEProm(savedScoreStartByte, SavedValue);
         NumSpeedyChanges = 0;
       }
       if (resetDoubleClick) {
         SavedValue = 0;
-        RPU_SetDisplay(0, SavedValue, true);  
+        RPU_SetDisplay(0, SavedValue, true);
         RPU_WriteULToEEProm(savedScoreStartByte, SavedValue);
       }
       if (curSwitch == otherSwitch) {
@@ -572,18 +574,17 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
         CurValue = (SavedValue / TensVal) % 10;
         LastSolTestTime = CurrentTime;
       }
-    } else {                            // Increase one digit at a time
+    } else {  // Increase one digit at a time
       RPU_SetDigitFlash(0, CurDigit < RPU_OS_NUM_DIGITS ? CurDigit : RPU_OS_NUM_DIGITS - 1, xValue, CurrentTime, 250, true, 1);
       if (curSwitch == otherSwitch) {
         CurDigit += 1;
-        if (CurDigit > 8) otherDoubleClick = true; // Maximum 9 digits in unsigned long; return to other loop
+        if (CurDigit > 8) otherDoubleClick = true;  // Maximum 9 digits in unsigned long; return to other loop
         TensVal *= 10;
         CurValue = (SavedValue / TensVal) % 10;
         if (CurDigit < RPU_OS_NUM_DIGITS) {
           xValue = SavedValue;
           RPU_SetDisplay(0, xValue, true, 1 + CurDigit);
-        }
-        else {
+        } else {
           xValue = SavedValue;
           for (byte count = RPU_OS_NUM_DIGITS; count <= CurDigit; ++count) {
             xValue /= 10;
@@ -599,8 +600,7 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
         if (CurDigit < RPU_OS_NUM_DIGITS) {
           xValue = SavedValue;
           RPU_SetDisplay(0, xValue, true, 1 + CurDigit);
-        }
-        else {
+        } else {
           xValue = SavedValue;
           for (byte count = RPU_OS_NUM_DIGITS; count <= CurDigit; ++count) {
             xValue /= 10;
@@ -624,18 +624,18 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
       LastSolTestTime = CurrentTime;
     }
     if (curSwitch == resetSwitch || (ResetHold && CurrentTime > LastSolTestTime + 250)) {
-      SavedValue +=1;
+      SavedValue += 1;
       LastSolTestTime = CurrentTime;
-      RPU_SetDisplay(0, SavedValue, true);  
+      RPU_SetDisplay(0, SavedValue, true);
       RPU_WriteULToEEProm(auditNumStartByte, SavedValue);
     }
     if (resetDoubleClick) {
       SavedValue = 0;
-      RPU_SetDisplay(0, SavedValue, true);  
+      RPU_SetDisplay(0, SavedValue, true);
       RPU_WriteULToEEProm(auditNumStartByte, SavedValue);
     }
   }
-  
+
   return returnState;
 }
 
@@ -647,4 +647,3 @@ unsigned long GetLastSelfTestChangedTime() {
 void SetLastSelfTestChangedTime(unsigned long setSelfTestChange) {
   LastSelfTestChange = setSelfTestChange;
 }
-

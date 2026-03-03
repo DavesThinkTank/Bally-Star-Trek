@@ -190,3 +190,41 @@ Changes / Additions:
   However, it will no longer automatically put you into a game.
 
 */
+
+
+/**************************************************************************
+
+Version 2026.01 by Dave's Think Tank
+
+Changes / Additions:
+- Tried to use RPU_InitializeMPU to read game switch, but didn't seem to work.
+- If in match mode, can no longer cancel game by pressing the game switch. Prevents impatient players from accidentally ending game before match awards.
+
+Bug Fixes:
+- BadSwitches: Fixed so that error data written in credit and match windows cannot be written over until attract mode ends. Removed unnecessary overwriting 
+    lines from scrolling display code.
+- SW_SAUCER during attract mode handled when switch hit, rather than while switch closed. Should ensure BadSwitches does not repeatedly pop the saucer.
+  - Needed to add code to Setup() to add SW_SAUCER to switch stack if ball in saucer when machine turned on.
+- SW_SAUCER during tilt modified to avoid solenoid activation more than once during ball bounce in saucer.
+
+*/
+
+
+/**************************************************************************
+
+Version 2026.02 by Dave's Think Tank
+
+Rule Change:
+- A new one-ball challenge game has been added, based on the Kobayashi Maru test! There are now three one-ball challenges, which are activated by passing the three reward levels 
+    set in the self-tests. If DIP switches 14 and 15 are set for an extra ball then completing each challenge will result in same player shoots again. 
+
+Changes / Additions:
+- Number of pushes (strength / length of time) for outhole increased from 4 to 5.
+- Display test modified to allow showing only the value eight. Assists in finding missing segments, dim segments, burnt segments.
+- Instructions for handling music files have been added to the Operator Game Adjustments.
+
+Bug Fixes:
+- Coin chute 2, coins per credit was always set to 1. Not true if set equal to chute 1 and chute 1 coins per credit not equal to 1. Fixed.
+- Timing of concurrent solenoid firings reviewed, some minor modifications.
+
+*/
