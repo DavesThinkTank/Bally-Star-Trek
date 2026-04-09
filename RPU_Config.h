@@ -22,6 +22,10 @@
     - Added RPU_USE_LED to control dimming of LED lamps
     - Added RPU_STROBE_LAMP and RPU_STROBE_TYPE to control use of xenon strobe lamps and their replacements
     - Added RPU_COIN_LOCKOUT and RPU_FLIPPER_ENABLE; used in solenoid self-test
+
+    Version FG2026.03 by Dave's Think Tank
+
+    - Commented out RPU_USE_LED to allow flickering nacelles in Bally Star Trek
  */
 
 #ifndef RPU_CONFIG_H
@@ -76,8 +80,9 @@
 
 
 // Definitions added by Dave's Think Tank:
-// Pinball uses LED lamps rather than incendescent. Comment out for incandescent.
-#define RPU_USE_LED
+// Pinball uses LED lamps rather than incendescent. Comment out for incandescent. 
+// (Commented out to use flickering LEDs as a feature on Bally Star Trek nacelles)
+// #define RPU_USE_LED
 // Identify xenon strobe lamp (e.g. Flash Gordon). Comment out if no such lamp.
 // #define RPU_STROBE_LAMP 75
 // Identify strobe type:

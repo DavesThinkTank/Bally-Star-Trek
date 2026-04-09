@@ -77,6 +77,11 @@ Version ST2026.02 by Dave's Think Tank
 
 - Extended cycling of displays to allow cycling displays with value 8 only.
 
+Version ST2026.03 by Dave's Think Tank
+
+- Added nacelle light patterns to light test. Press OtherSwitch during light 11 or 12 (nacelles) test.
+- If sound test ended on a background sound, sound would not end when DIP switch test began.
+
  */
 
 #include <Arduino.h>
@@ -207,7 +212,21 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
       LastSolTestTime = CurrentTime;
       LightShow = 0;
     }
-    if (curSwitch == otherSwitch) {
+    if (curSwitch  == resetSwitch && LightShow >= 100) { // End nacelle patterns
+      LightShow = 0;
+      RPU_TurnOffAllLamps();
+      RPU_SetLampState(CurValue, 1, 0, 0);
+      LastSolTestTime = CurrentTime;
+      RPU_SetDisplay(0, CurValue, true);
+    }
+    else if (curSwitch == otherSwitch && (CurValue == 11 || CurValue == 12)) { // Show nacelle patterns
+      if (LightShow < 100) 
+        LightShow = 100;
+      else
+        LightShow += 1;
+      returnState = 20000 + LightShow;
+    }
+    else if (curSwitch == otherSwitch) {
       LightShow += 1;
       if (LightShow > 6) LightShow = 0;  // Light displays numbered zero through 6
       returnState = 20000 + LightShow;
@@ -409,7 +428,7 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
 #elif defined(RPU_OS_USE_WTYPE_2_SOUND)
         RPU_PushToSoundStack(SoundToPlay, 8);
 #elif defined(RPU_OS_USE_WAV_TRIGGER) || defined(RPU_OS_USE_WAV_TRIGGER_1p3)
-        returnState = 10000 + SoundToPlay;  // Main program has all the info to play sounds using WAV Trigger!
+        returnState = 10000 + (SoundToPlay == 05 ? 90 : SoundToPlay);  // Main program has all the info to play sounds using WAV Trigger! Sound 5 saved for DIP switches below.
 #endif
 
         SoundPlaying = SoundToPlay;
@@ -428,6 +447,12 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
   } else if (curState == MACHINE_STATE_TEST_DIP_SWITCHES) {  //                                              *** Test DIP Switches ***
 
     if (curStateChanged) {
+#if defined(RPU_OS_USE_SB100)
+        RPU_PlaySB100(0);
+#endif
+#if defined(RPU_OS_USE_WAV_TRIGGER) || defined(RPU_OS_USE_WAV_TRIGGER_1p3) || defined(RPU_OS_USE_S_AND_T)
+        returnState = 10005;  // Main program has all the info to play sounds using WAV Trigger!
+#endif
       RPU_TurnOffAllLamps();
       RPU_SetDisplayBallInPlay(7);
 

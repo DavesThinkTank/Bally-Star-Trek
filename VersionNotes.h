@@ -1,18 +1,18 @@
 /**************************************************************************
 
-  This file is part of Bally Star Trek 2025 -  for the Arduino Mega 2560
+  This file is part of Bally Star Trek: Arduino Version
 
   The author of this program disclaims all copyright in order to make this 
   program freely available in perpetuity to anyone who would like to use 
   it. David McIntosh, 2025/04/19
 
-  Bally Star Trek 2025 is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
+  Bally Star Trek: Arduino Version is free software: you can redistribute 
+  it and/or modify it under the terms of the GNU General Public License as 
+  published by the Free Software Foundation, either version 3 of the License, 
+  or (at your option) any later version.
 
-  Bally Star Trek 2025 is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  Bally Star Trek: Arduino Version is distributed in the hope that it will 
+  be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
 
@@ -226,5 +226,51 @@ Changes / Additions:
 Bug Fixes:
 - Coin chute 2, coins per credit was always set to 1. Not true if set equal to chute 1 and chute 1 coins per credit not equal to 1. Fixed.
 - Timing of concurrent solenoid firings reviewed, some minor modifications.
+- Switches 14 and 15 set the awards for a number of playfield targets, and the three scoring thresholds. The three possibilities for scoring thresholds have been a free 
+    game, extra ball, or 25000 points. The original manual specifies the awards should be free game, extra ball, or no award. The "No Award" option has been restored.
+
+*/
+
+
+/**************************************************************************
+
+Version 2026.03 by Dave's Think Tank
+
+Rule Change:
+
+Changes / Additions:
+- Programming added to turn left and right nacelle lights on during game. Assumes a CPR playfield with lamps hooked up to lights #11 (A5-J3-15) and 12 (A5-J1-23). See the 
+    manual, "Adding nacelle lights".
+- Added an Operator Game Adjustment value to set nacelle lights to a standard brightness throughout the game. 31 levels are available. 0, 1, and 2 are the most
+    useful here, for setting both lights to off, bright, or dim.
+- Light test modified to include nacelle light patterns. Since very few people (i.e. nobody but me) will have nacelle lights hooked up to lights #11 and 12, I have
+    set it to default to, in general, never (or really seldom ever) show the nacelle light patterns. To show nacelle patterns, go to the light test, press the game button to
+    count up to #11 or 12 (the nacelle lights), then press coin switch #3 repeatedly to go through all nacelle light patterns. Review all patterns (31 of them), or press
+    game button to continue with usual light test.
+- Ball search added. If no playfield switch is hit for 20 seconds, a ball search is conducted by firing all solenoids. If there is still no switch hit, tilt is turned
+    off, and remains off until a playfield switch is hit. You have the option to disallow this by defining BALL_SEARCH_TILT to 0 in the Operator Game Adjustments.
+- There is no longer any ball save for challenge rounds. This seems more in line with the idea that you are earning another ball.
+- The amount of user intervention required to set up music files has been greatly reduced. Instead of requiring you to go to a different file, find lines of code, add comments
+    to some and remove comments from others, the whole process is now handled as a single Operator Game Adjustment.
+- A new "Challenge Mode" game has been added. In this game you are given three balls to defeat three challenges - beat the Klingons, stop the ship's self-destruct, and 
+    save the Kobayashi Maru. Great for quick competitions! Three gameplay modes are now available - regular gameplay, Kids' Mode, and Challenge Mode.
+- "Game Mode" is selected at the start of a new game by pressing and holding the game button, either during attract mode or before player 1 begins play. After holding the 
+    button for one second, the credit window will begin scrolling the values 1, 2, and 3. Release the button on 1 for a regular game, 2 for kids' mode, or 3 for Challenge 
+    Mode. This also resolves a problem where players would find out after starting a game that they were in Kids' Mode. When this happens just long-press the game button and
+    select the game you wanted. Short-pressing the game button will still allow you to add more players for as long as you are on ball 1.
+- Two methods of turning on kids' mode - holding the game button while turning on the machine, and pressing the game button and coin slot 3 switch at the same time, have both
+    been removed. The new game mode selection handles this far better than either.
+
+Bug Fixes:
+- A bug fix last month was inadvertently left out of this documentation. See, "Switches 14 and 15..." under 2026.02 bug fixes.
+- If the user did not have music files added to the WAV Trigger, the pinball would stop playing background sounds after the winning or losing sounds were played
+    following a challenge ball. The background sounds were stopped, but when asked to restart them, the program saw the same file number and assumed it was already 
+    playing! Fixed.
+- Player shoots again light did not come on when a challenge threshold was achieved. This was actually a choice, but I now think it was the wrong choice! Lights now let
+    you know that you are the next player up.
+- If you reached the first threshold on your first ball, your B-A-L-L-Y lights would be reset and you would start over at 10000 for your first regular ball following the 
+    challenge ball. Fixed.
+- Challenge 1 and 2 would sometimes give you an extra 25000, in addition to an extra ball and same player shoots again. Fixed.
+- If sound test ended on a background sound, sound would not end when DIP switch test began. Fixed.
 
 */

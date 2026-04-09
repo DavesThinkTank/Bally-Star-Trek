@@ -1,5 +1,5 @@
 # Bally Star Trek 2026
-## Version 2026.02
+## Version 2026.03
 ## for the Arduino Mega 2560 Rev3
 
 Re-imagined rules for Bally's 1979 Star Trek pinball machine. Implemented using the Retro Pin Upgrade (RPU), using a daughter card connected to the MPU's J5 connector. The card can be built yourself using instructions available online. The following website can help you with this: 
@@ -9,9 +9,9 @@ An easier option is to purchase a kit, or even a pre-built card. Both are availa
 
 ### To use this code (more complete information is available in the manual):
 * Download this zip file (Code > Download ZIP) or clone the repository to your hard drive.
-* Unzip the ST2026p02 repository and make sure the parent folder is named: ST2026p02
+* Unzip the ST2026p03 repository and make sure the parent folder is named: ST2026p03
 * Download Arduino's IDE (Integrated Development Environment) from https://www.arduino.cc/en/software. And pay them a few bucks!
-* Find ST2026p02.ino in your ST2026p02 folder, and open it with the Arduino IDE. Compile and upload to an Arduino Mega 2560 microcontroller.
+* Find ST2026p03.ino in your ST2026p03 folder, and open it with the Arduino IDE. Compile and upload to an Arduino Mega 2560 microcontroller.
 * Attach the Arduino 2560 microcontroller, as part of the daughter card from above, to the J5 connector of your Flash Gordon pinball's MPU board.
 * Sound files can be found at https://drive.google.com/drive/folders/175rKGxsXPs678i7x1qTePkK48J6tJLC7?usp=sharing 
 * Copy and transfer the sound files to the micro SD card on your WAVTrigger.
@@ -21,11 +21,48 @@ Be sure to review all self-test game settings as they may have defaulted to zero
 
 ### How to operate self-test / audit / game settings
 - Inner coin door button: Enters self-test / audit mode and advances through sections
-- Outer coin door game button: Can be used to control and direct some tests. See the included file StarTrek2026-02manual.pdf for a full explanation of the self-tests and game settings available.
+- Outer coin door game button: Can be used to control and direct some tests. See the included file StarTrek2026-03manual.pdf for a full explanation of the self-tests and game settings available.
 - Coin 3 inner door switch: Some tests require the use of the right-most coin drop switch to modify or move between values. See the included manual for more information.
 - Slam switch: The slam switch is located on the inside of the game door. It can be used to end a self-test session without going through all the tests. See the manual for more information.
 
 ### Version History
+### Version 2026.03 by Dave's Think Tank
+
+Changes / Additions:
+- Programming added to turn left and right nacelle lights on during game. Assumes a CPR playfield with lamps hooked up to lights #11 (A5-J3-15) and 12 (A5-J1-23). See the 
+    manual, "Adding nacelle lights".
+- Added an Operator Game Adjustment value to set nacelle lights to a standard brightness throughout the game. 31 levels are available. 0, 1, and 2 are the most
+    useful here, for setting both lights to off, bright, or dim.
+- Light test modified to include nacelle light patterns. Since very few people (i.e. nobody but me) will have nacelle lights hooked up to lights #11 and 12, I have
+    set it to default to, in general, never (or really seldom ever) show the nacelle light patterns. To show nacelle patterns, go to the light test, press the game button to
+    count up to #11 or 12 (the nacelle lights), then press coin switch #3 repeatedly to go through all nacelle light patterns. Review all patterns (31 of them), or press
+    game button to continue with usual light test.
+- Ball search added. If no playfield switch is hit for 20 seconds, a ball search is conducted by firing all solenoids. If there is still no switch hit, tilt is turned
+    off, and remains off until a playfield switch is hit. You have the option to disallow this by defining BALL_SEARCH_TILT to 0 in the Operator Game Adjustments. 
+- There is no longer any ball save for challenge rounds. This seems more in line with the idea that you are earning another ball.
+- The amount of user intervention required to set up music files has been greatly reduced. Instead of requiring you to go to a different file, find lines of code, add comments
+    to some and remove comments from others, the whole process is now handled as a single Operator Game Adjustment.
+- A new "Challenge Mode" game has been added. In this game you are given three balls to defeat three challenges - beat the Klingons, stop the ship's self-destruct, and 
+    save the Kobayashi Maru. Great for quick competitions! Three gameplay modes are now available - regular gameplay, Kids' Mode, and Challenge Mode.
+- "Game Mode" is selected at the start of a new game by pressing and holding the game button, either during attract mode or before player 1 begins play. After holding the 
+    button for one second, the credit window will begin scrolling the values 1, 2, and 3. Release the button on 1 for a regular game, 2 for kids' mode, or 3 for Challenge 
+    Mode. This also resolves a problem where players would find out after starting a game that they were in Kids' Mode. When this happens just long-press the game button and
+    select the game you wanted. Short-pressing the game button will still allow you to add more players for as long as you are on ball 1.
+- Two methods of turning on kids' mode - holding the game button while turning on the machine, and pressing the game button and coin slot 3 switch at the same time, have both
+    been removed. The new game mode selection handles this far better than either.
+
+Bug Fixes:
+- A bug fix last month was inadvertently left out of this documentation. See, "Switches 14 and 15..." under 2026.02 bug fixes.
+- If the user did not have music files added to the WAV Trigger, the pinball would stop playing background sounds after the winning or losing sounds were played
+    following a challenge ball. The background sounds were stopped, but when asked to restart them, the program saw the same file number and assumed it was already 
+    playing! Fixed.
+- Player shoots again light did not come on when a challenge threshold was achieved. This was actually a choice, but I now think it was the wrong choice! Lights now let
+    you know that you are the next player up.
+- If you reached the first threshold on your first ball, your B-A-L-L-Y lights would be reset and you would start over at 10000 for your first regular ball following the 
+    challenge ball. Fixed.
+- Challenge 1 and 2 would sometimes give you an extra 25000, in addition to an extra ball and same player shoots again. Fixed.
+- If sound test ended on a background sound, sound would not end when DIP switch test began. Fixed.
+
 ### Version 2026.02 by Dave's Think Tank
 
 Rule Change:
@@ -40,6 +77,8 @@ Changes / Additions:
 Bug Fixes:
 - Coin chute 2, coins per credit was always set to 1. Not true if set equal to chute 1 and chute 1 coins per credit not equal to 1. Fixed.
 - Timing of concurrent solenoid firings reviewed, some minor modifications.
+- Switches 14 and 15 set the awards for a number of playfield targets, and the three scoring thresholds. The three possibilities for scoring thresholds have been a free 
+    game, extra ball, or 25000 points. The original manual specifies the awards should be free game, extra ball, or no award. The "No Award" option has been restored.
 
 ### Version 2026.01 by Dave's Think Tank
 
