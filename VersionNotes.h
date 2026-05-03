@@ -274,3 +274,26 @@ Bug Fixes:
 - If sound test ended on a background sound, sound would not end when DIP switch test began. Fixed.
 
 */
+
+
+
+/**************************************************************************
+
+Version 2026.04 by Dave's Think Tank
+
+Rule Change:
+
+Changes / Additions:
+- In the Kobayashi Maru challenge, all the planet targets were flashing, and all the Klingon ships were flashing. It was too much flashing, even if every one of
+    them was a target! Now, the five Klingons do not flash, but are lit dimly.
+- Modified high score and other large-value self-test updates to include values for the three game modes.
+- Updates of high score and other large values begins with 10 slow increases, instead of 6. Should aid in fine tuning to ultimate value.
+- Modified code to fully distinguish between single click, double click, and long press of reset button. For example, previously a double click registered as
+  a single click followed by a double click.
+- Reviewed self-tests to ensure they all use the available buttons in a consistent manner, and as much as possible can be achieved with just the game button.
+- Replaced use of coin 3 switch in self-tests with "any other switch". That is, hitting any switch other than the game, slam, or sef-test switch replaces the use of the coin 3 switch.
+
+Bug Fixes:
+- Ball in Play and credit lights did not come on during Challenge mode. fixed.
+*/
+

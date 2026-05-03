@@ -1,5 +1,5 @@
 # Bally Star Trek 2026
-## Version 2026.03
+## Version 2026.04
 ## for the Arduino Mega 2560 Rev3
 
 Re-imagined rules for Bally's 1979 Star Trek pinball machine. Implemented using the Retro Pin Upgrade (RPU), using a daughter card connected to the MPU's J5 connector. The card can be built yourself using instructions available online. The following website can help you with this: 
@@ -9,9 +9,9 @@ An easier option is to purchase a kit, or even a pre-built card. Both are availa
 
 ### To use this code (more complete information is available in the manual):
 * Download this zip file (Code > Download ZIP) or clone the repository to your hard drive.
-* Unzip the ST2026p03 repository and make sure the parent folder is named: ST2026p03
+* Unzip the ST2026p04 repository and make sure the parent folder is named: ST2026p04
 * Download Arduino's IDE (Integrated Development Environment) from https://www.arduino.cc/en/software. And pay them a few bucks!
-* Find ST2026p03.ino in your ST2026p03 folder, and open it with the Arduino IDE. Compile and upload to an Arduino Mega 2560 microcontroller.
+* Find ST2026p04.ino in your ST2026p04 folder, and open it with the Arduino IDE. Compile and upload to an Arduino Mega 2560 microcontroller.
 * Attach the Arduino 2560 microcontroller, as part of the daughter card from above, to the J5 connector of your Flash Gordon pinball's MPU board.
 * Sound files can be found at https://drive.google.com/drive/folders/175rKGxsXPs678i7x1qTePkK48J6tJLC7?usp=sharing 
 * Copy and transfer the sound files to the micro SD card on your WAVTrigger.
@@ -21,11 +21,26 @@ Be sure to review all self-test game settings as they may have defaulted to zero
 
 ### How to operate self-test / audit / game settings
 - Inner coin door button: Enters self-test / audit mode and advances through sections
-- Outer coin door game button: Can be used to control and direct some tests. See the included file StarTrek2026-03manual.pdf for a full explanation of the self-tests and game settings available.
+- Outer coin door game button: Can be used to control and direct some tests. See the included file StarTrek2026-04manual.pdf for a full explanation of the self-tests and game settings available.
 - Coin 3 inner door switch: Some tests require the use of the right-most coin drop switch to modify or move between values. See the included manual for more information.
 - Slam switch: The slam switch is located on the inside of the game door. It can be used to end a self-test session without going through all the tests. See the manual for more information.
 
 ### Version History
+### Version 2026.04 by Dave's Think Tank
+
+Changes / Additions:
+- In the Kobayashi Maru challenge, all the planet targets were flashing, and all the Klingon ships were flashing. It was too much flashing, even if every one of
+    them was a target! Now, the five Klingons do not flash, but are lit dimly.
+- Modified high score and other large-value self-test updates to include values for the three game modes.
+- Updates of high score and other large values begins with 10 slow increases, instead of 6. Should aid in fine tuning to ultimate value.
+- Modified code to fully distinguish between single click, double click, and long press of reset button. For example, previously a double click registered as
+  a single click followed by a double click.
+- Reviewed self-tests to ensure they all use the available buttons in a consistent manner, and as much as possible can be achieved with just the game button.
+- Replaced use of coin 3 switch in self-tests with "any other switch". That is, hitting any switch other than the game, slam, or sef-test switch replaces the use of the coin 3 switch.
+
+Bug Fixes:
+- Ball in Play and credit lights did not come on during Challenge mode. fixed.
+
 ### Version 2026.03 by Dave's Think Tank
 
 Changes / Additions:
@@ -61,7 +76,6 @@ Bug Fixes:
 - If you reached the first threshold on your first ball, your B-A-L-L-Y lights would be reset and you would start over at 10000 for your first regular ball following the 
     challenge ball. Fixed.
 - Challenge 1 and 2 would sometimes give you an extra 25000, in addition to an extra ball and same player shoots again. Fixed.
-- If sound test ended on a background sound, sound would not end when DIP switch test began. Fixed.
 
 ### Version 2026.02 by Dave's Think Tank
 
