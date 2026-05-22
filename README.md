@@ -13,7 +13,7 @@ An easier option is to purchase a kit, or even a pre-built card. Both are availa
 * Download Arduino's IDE (Integrated Development Environment) from https://www.arduino.cc/en/software. And pay them a few bucks!
 * Find ST2026p04.ino in your ST2026p04 folder, and open it with the Arduino IDE. Compile and upload to an Arduino Mega 2560 microcontroller.
 * Attach the Arduino 2560 microcontroller, as part of the daughter card from above, to the J5 connector of your Flash Gordon pinball's MPU board.
-* Sound files can be found at https://drive.google.com/drive/folders/175rKGxsXPs678i7x1qTePkK48J6tJLC7?usp=sharing 
+* Sound files can be found at https://drive.google.com/drive/folders/1jDBnFHythNCg0qE2jMhNxCWICuR75obn 
 * Copy and transfer the sound files to the micro SD card on your WAVTrigger.
 
 ### Adjustments on first startup
