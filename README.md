@@ -1,5 +1,5 @@
 # Bally Star Trek 2026
-## Version 2026.04
+## Version 2026.05
 ## for the Arduino Mega 2560 Rev3
 
 Re-imagined rules for Bally's 1979 Star Trek pinball machine. Implemented using the Retro Pin Upgrade (RPU), using a daughter card connected to the MPU's J5 connector. The card can be built yourself using instructions available online. The following website can help you with this: 
@@ -9,11 +9,11 @@ An easier option is to purchase a kit, or even a pre-built card. Both are availa
 
 ### To use this code (more complete information is available in the manual):
 * Download this zip file (Code > Download ZIP) or clone the repository to your hard drive.
-* Unzip the ST2026p04 repository and make sure the parent folder is named: ST2026p04
+* Unzip the ST2026p05 repository and make sure the parent folder is named: ST2026p05
 * Download Arduino's IDE (Integrated Development Environment) from https://www.arduino.cc/en/software. And pay them a few bucks!
-* Find ST2026p04.ino in your ST2026p04 folder, and open it with the Arduino IDE. Compile and upload to an Arduino Mega 2560 microcontroller.
-* Attach the Arduino 2560 microcontroller, as part of the daughter card from above, to the J5 connector of your Flash Gordon pinball's MPU board.
-* Sound files can be found at https://drive.google.com/drive/folders/1jDBnFHythNCg0qE2jMhNxCWICuR75obn 
+* Find ST2026p05.ino in your ST2026p05 folder, and open it with the Arduino IDE. Compile and upload to an Arduino Mega 2560 microcontroller.
+* Attach the Arduino to the J5 connector of your Flash Gordon pinball's MPU board.
+* Sound files can be found at https://drive.google.com/drive/u/2/folders/1jDBnFHythNCg0qE2jMhNxCWICuR75obn
 * Copy and transfer the sound files to the micro SD card on your WAVTrigger.
 
 ### Adjustments on first startup
@@ -21,11 +21,24 @@ Be sure to review all self-test game settings as they may have defaulted to zero
 
 ### How to operate self-test / audit / game settings
 - Inner coin door button: Enters self-test / audit mode and advances through sections
-- Outer coin door game button: Can be used to control and direct some tests. See the included file StarTrek2026-04manual.pdf for a full explanation of the self-tests and game settings available.
-- Coin 3 inner door switch: Some tests require the use of the right-most coin drop switch to modify or move between values. See the included manual for more information.
+- Outer coin door game button: Can be used to control and direct some tests. See the included file StarTrek2026-05manual.pdf for a full explanation of the self-tests and game settings available.
+- Any other switch: Some tests require the use of a second switch to modify values or move between options. See the included manual for more information.
 - Slam switch: The slam switch is located on the inside of the game door. It can be used to end a self-test session without going through all the tests. See the manual for more information.
 
 ### Version History
+###Version 2026.05 by Dave's Think Tank
+
+Changes / Additions:
+- Countdown from 10 added to ladder during 60-second (Challenge Mode 2) and 15-second (Challenge Mode 3) timers. Reasoning: last ten seconds expresses urgency,
+  full 60-seconds looks junky and difficult to interpret, full 15 goes off and on too often. Last ten seconds seems about right.
+- Sound added to solenoid test. Beeps whenever a switch is detected.
+- Sound added to stuck switch test. Beeps whenever a switch is hit.
+- Sound added to switch bounce test. Beeps whenever a switch bounce is detected.
+- Modified version display, included RPU version, to match Dick Hamill's version display.
+
+Bug Fixes:
+- When challenges earned, same player shoots again lights would sometimes go out when ball started. Now will stay on until shooter lane rollover crossed.
+
 ### Version 2026.04 by Dave's Think Tank
 
 Changes / Additions:

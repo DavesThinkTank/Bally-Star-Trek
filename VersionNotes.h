@@ -297,3 +297,25 @@ Bug Fixes:
 - Ball in Play and credit lights did not come on during Challenge mode. fixed.
 */
 
+
+
+
+/**************************************************************************
+
+Version 2026.05 by Dave's Think Tank
+
+Rule Change:
+
+Changes / Additions:
+- Countdown from 10 added to ladder during 60-second (Challenge Mode 2) and 15-second (Challenge Mode 3) timers. Reasoning: last ten seconds expresses urgency,
+  full 60-seconds looks junky and difficult to interpret, full 15 goes off and on too often. Last ten seconds seems about right.
+- Sound added to solenoid test. Beeps whenever a switch is detected.
+- Sound added to stuck switch test. Beeps whenever a switch is hit.
+- Sound added to switch bounce test. Beeps whenever a switch bounce is detected.
+- Modified version display, included RPU version, to match Dick Hamill's version display.
+
+Bug Fixes:
+- When challenges earned, same player shoots again lights would sometimes go out when ball started. Now will stay on until shooter lane rollover crossed.
+*/
+
+

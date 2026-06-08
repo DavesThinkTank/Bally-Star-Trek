@@ -92,6 +92,13 @@ Version ST2026.04 by Dave's Think Tank
 - Reviewed all code to minimize use of otherSwitch, and to maintain consistency of switch use between update screens.
 - Where otherSwitch is still used, added ability to use any switch as the otherSwitch.
 
+Version ST2026.05 by Dave's Think Tank
+
+- Sound added to solenoid test. WARNING_SOUND played whenever a switch is detected.
+- Sound added to stuck switch test. WARNING_SOUND played whenever a switch is hit.
+- Sound added to switch bounce test. WARNING_SOUND played whenever a switch bounce is detected.
+
+
  */
 
 #include <Arduino.h>
@@ -354,6 +361,12 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
     if (curSwitch != resetSwitch && curSwitch != otherSwitch && curSwitch != endSwitch && curSwitch != SWITCH_STACK_EMPTY && curSwitch != SW_SELF_TEST_SWITCH) {
       RPU_SetDisplayCredits(curSwitch);
       RPU_SetDisplay(3, CurrentTime - SolSwitchTimer, true, 3);
+      #if defined(RPU_OS_USE_S_AND_T)
+      RPU_PlaySoundSAndT(WARNING_SOUND);
+      #endif
+      #if defined(RPU_OS_USE_WAV_TRIGGER) || defined(RPU_OS_USE_WAV_TRIGGER_1p3)
+      returnState = 10000 + WARNING_SOUND;  // Main program has all the info to play sounds using WAV Trigger!
+      #endif
     }
     if (!SolenoidOn) {
       RPU_SetDisplayCredits(99, false);  // Blank display when solenoids turned off
@@ -403,6 +416,14 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
     }
     RPU_SetDisplayCredits(displayOutput);  // Let user know how many switches are on, since max four displayed
 
+    #if defined(RPU_OS_USE_S_AND_T)
+    if (curSwitch == resetSwitch || curSwitch == otherSwitch || curSwitch == endSwitch || anyOtherClick)
+      RPU_PlaySoundSAndT(WARNING_SOUND);
+    #elif defined(RPU_OS_USE_WAV_TRIGGER) || defined(RPU_OS_USE_WAV_TRIGGER_1p3)
+    if (curSwitch == resetSwitch || curSwitch == otherSwitch || curSwitch == endSwitch || anyOtherClick)
+      returnState = 10000 + WARNING_SOUND;  // Main program has all the info to play sounds using WAV Trigger!
+    #endif
+
     if (resetDoubleClick) {                  // Double-click to reset all drop targets. GAME SPECIFIC CODE!
       RPU_PushToSolenoidStack(13, 5, true);  // SO_DTARGET
     }
@@ -421,11 +442,16 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
       HoldSwitch = SW_SELF_TEST_SWITCH;
     }
 
-
     if (curSwitch == HoldSwitch && curSwitch != SWITCH_STACK_EMPTY && curSwitch != SW_SELF_TEST_SWITCH && CurrentTime - SwitchTimer < 500) {  // double-hit detected on a single switch
       RPU_SetDisplay(0, curSwitch, true);
       RPU_SetDisplay(1, CurrentTime - SwitchTimer, true);
       SwitchTimer = CurrentTime;
+      #if defined(RPU_OS_USE_S_AND_T)
+      RPU_PlaySoundSAndT(WARNING_SOUND);
+      #endif
+      #if defined(RPU_OS_USE_WAV_TRIGGER) || defined(RPU_OS_USE_WAV_TRIGGER_1p3)
+      returnState = 10000 + WARNING_SOUND;  // Main program has all the info to play sounds using WAV Trigger!
+      #endif
     } else {
       if (curSwitch != SWITCH_STACK_EMPTY && curSwitch != SW_SELF_TEST_SWITCH) {  // single switch hit once
         RPU_SetDisplay(0, curSwitch, true);
@@ -502,11 +528,14 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
   } else if (curState == MACHINE_STATE_TEST_DIP_SWITCHES) {  //                                              *** Test DIP Switches ***
 
     if (curStateChanged) {
+#ifdef RPU_OS_USE_S_AND_T
+    RPU_PlaySoundSAndT(5);  // Sound off
+#endif
 #if defined(RPU_OS_USE_SB100)
         RPU_PlaySB100(0);
 #endif
-#if defined(RPU_OS_USE_WAV_TRIGGER) || defined(RPU_OS_USE_WAV_TRIGGER_1p3) || defined(RPU_OS_USE_S_AND_T)
-        returnState = 10005;  // Main program has all the info to play sounds using WAV Trigger!
+#if defined(RPU_OS_USE_WAV_TRIGGER) || defined(RPU_OS_USE_WAV_TRIGGER_1p3)
+        returnState = 10000 + 5;  // Main program has all the info to play sounds using WAV Trigger!
 #endif
       RPU_TurnOffAllLamps();
       RPU_SetDisplayBallInPlay(7);
