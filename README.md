@@ -1,5 +1,5 @@
 # Bally Star Trek 2026
-## Version 2026.05
+## Version 2026.06
 ## for the Arduino Mega 2560 Rev3
 
 Re-imagined rules for Bally's 1979 Star Trek pinball machine. Implemented using the Retro Pin Upgrade (RPU), using a daughter card connected to the MPU's J5 connector. The card can be built yourself using instructions available online. The following website can help you with this: 
@@ -9,9 +9,9 @@ An easier option is to purchase a kit, or even a pre-built card. Both are availa
 
 ### To use this code (more complete information is available in the manual):
 * Download this zip file (Code > Download ZIP) or clone the repository to your hard drive.
-* Unzip the ST2026p05 repository and make sure the parent folder is named: ST2026p05
+* Unzip the ST2026p06 repository and make sure the parent folder is named: ST2026p06
 * Download Arduino's IDE (Integrated Development Environment) from https://www.arduino.cc/en/software. And pay them a few bucks!
-* Find ST2026p05.ino in your ST2026p05 folder, and open it with the Arduino IDE. Compile and upload to an Arduino Mega 2560 microcontroller.
+* Find ST2026p06.ino in your ST2026p06 folder, and open it with the Arduino IDE. Compile and upload to an Arduino Mega 2560 microcontroller.
 * Attach the Arduino to the J5 connector of your Flash Gordon pinball's MPU board.
 * Sound files can be found at https://drive.google.com/drive/u/2/folders/1jDBnFHythNCg0qE2jMhNxCWICuR75obn
 * Copy and transfer the sound files to the micro SD card on your WAVTrigger.
@@ -21,11 +21,24 @@ Be sure to review all self-test game settings as they may have defaulted to zero
 
 ### How to operate self-test / audit / game settings
 - Inner coin door button: Enters self-test / audit mode and advances through sections
-- Outer coin door game button: Can be used to control and direct some tests. See the included file StarTrek2026-05manual.pdf for a full explanation of the self-tests and game settings available.
+- Outer coin door game button: Can be used to control and direct some tests. See the included file StarTrek2026-06manual.pdf for a full explanation of the self-tests and game settings available.
 - Any other switch: Some tests require the use of a second switch to modify values or move between options. See the included manual for more information.
 - Slam switch: The slam switch is located on the inside of the game door. It can be used to end a self-test session without going through all the tests. See the manual for more information.
 
 ### Version History
+### Version 2026.06 by Dave's Think Tank
+
+Changes / Additions:
+- The letter you are shooting for in the skill shot will now flash in the word B-A-L-L-Y in the middle of the playfield. This ensures the letter you need
+  to hit is flashing somewhere, and you can be absolutely sure what letter is required.
+- After ball search, and while tilt is deactivated, the Tilt light will flash. Spock tells you "We may be here for a very long time."
+- All sounds end when a new game begins. For anyone who has modified the end quote to play the TV show's end music!
+
+Bug Fixes:
+- If the outhole switch was set off by vibration, or any other reason during one of the challenges, the challenge would immediately end with an
+  Enterprise explosion. Okay, this must be rare, but it happened to me! For any other time or circumstance, the ball generally has to be in the outhole
+  for a half second before the program takes action. The end-of-game trigger for the challenges is now set up the same way.
+
 ###Version 2026.05 by Dave's Think Tank
 
 Changes / Additions:

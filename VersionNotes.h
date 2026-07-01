@@ -319,3 +319,25 @@ Bug Fixes:
 */
 
 
+
+
+
+/**************************************************************************
+
+Version 2026.06 by Dave's Think Tank
+
+Rule Change:
+
+Changes / Additions:
+- The letter you are shooting for in the skill shot will now flash in the word B-A-L-L-Y in the middle of the playfield. This ensures the letter you need
+  to hit is flashing somewhere, and you can be absolutely sure what letter is required.
+- After ball search, and while tilt is deactivated, the Tilt light will flash. Spock tells you "We may be here for a very long time."
+- All sounds end when a new game begins. For anyone who has modified the end quote to play the TV show's end music!
+
+Bug Fixes:
+- If the outhole switch was set off by vibration, or any other reason during one of the challenges, the challenge would immediately end with an
+  Enterprise explosion. Okay, this must be rare, but it happened to me! For any other time or circumstance, the ball generally has to be in the outhole
+  for a half second before the program takes action. The end-of-game trigger for the challenges is now set up the same way.
+*/
+
+
