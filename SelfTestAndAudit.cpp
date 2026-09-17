@@ -98,6 +98,12 @@ Version ST2026.05 by Dave's Think Tank
 - Sound added to stuck switch test. WARNING_SOUND played whenever a switch is hit.
 - Sound added to switch bounce test. WARNING_SOUND played whenever a switch bounce is detected.
 
+Version ST2026.08 by Dave's Think Tank
+
+- Upgraded to RPU v5.14. RPU_CycleAllDisplays() in v5.14 has been updated with the changes I made previously (display all 8s), and so I changed my display test 
+  to use the official version. A minor change was required in the call to RPU_CycleAllDisplays().
+- RPU v5.14 also changes the display test to scroll from left to right. I have updated the DIP switch test below to match.
+
 
  */
 
@@ -340,7 +346,7 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
 #endif
     }
     if (resetDoubleClick) display8s = !display8s;
-    RPU_CycleAllDisplays(CurrentTime, CurValue, display8s);
+    RPU_CycleAllDisplays(CurrentTime, CurValue, display8s ? 8 : 255);
   } else if (curState == MACHINE_STATE_TEST_SOLENOIDS) {  //                                                 *** Test Solenoids ***
     if (curStateChanged) {
       RPU_TurnOffAllLamps();
@@ -544,15 +550,15 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
         dipBankVal[i] = RPU_ReadByteFromEEProm(RPU_DIP_BANK + i);
 
         DisplayDIP[i] = 0;
-        int k = 32;
+        int k = 1;
         for (int j = 0; j < 6; ++j) {
           DisplayDIP[i] = 10 * DisplayDIP[i] + ((dipBankVal[i] & k) != 0);
-          k = k >> 1;
+          k = k << 1;
         }
         RPU_SetDisplayBlank(i, 127);
         RPU_SetDisplay(i, DisplayDIP[i], false);
       }
-      DisplayDIP[4] = 10 * (0 != (dipBankVal[0] & 128)) + (0 != (dipBankVal[0] & 64));
+      DisplayDIP[4] = 10 * (0 != (dipBankVal[0] & 64)) + (0 != (dipBankVal[0] & 128));
       RPU_SetDisplayCredits(DisplayDIP[4], true, true);
 
       CurValue = 0;
@@ -576,33 +582,33 @@ int RunBaseSelfTest(int curState, boolean curStateChanged, unsigned long Current
       xDisplay = 4;           // Credit window
     }
     if (CurDisplay != holdDisplay) {  // Credit window reset to match last two digits of current display
-      DisplayDIP[4] = 10 * (0 != (dipBankVal[CurDisplay] & 128)) + (0 != (dipBankVal[CurDisplay] & 64));
+      DisplayDIP[4] = 10 * (0 != (dipBankVal[CurDisplay] & 64)) + (0 != (dipBankVal[CurDisplay] & 128));
       RPU_SetDisplayCredits(DisplayDIP[4], true, true);
       holdDisplay = CurDisplay;
     }
 
-    if (resetDoubleClick) {                                       // Flip current digit in current display
+    if (curSwitch == otherSwitch || resetDoubleClick || anyOtherClick) {                                       // Flip current digit in current display
       dipBankVal[CurDisplay] = dipBankVal[CurDisplay] ^ (1 << CurDigit);  // exclusive or function, reverses current digit
       RPU_WriteByteToEEProm(RPU_DIP_BANK + CurDisplay, dipBankVal[CurDisplay]);
 
       if (xDisplay < 4) {  // display value as binary
         DisplayDIP[CurDisplay] = 0;
-        int k = 32;
+        int k = 1;
         for (int j = 0; j < 6; ++j) {
           DisplayDIP[CurDisplay] = 10 * DisplayDIP[CurDisplay] + ((dipBankVal[CurDisplay] & k) != 0);
-          k = k >> 1;
+          k = k << 1;
         }
         RPU_SetDisplay(CurDisplay, DisplayDIP[CurDisplay], false);
       } else {
-        DisplayDIP[4] = 10 * (0 != (dipBankVal[CurDisplay] & 128)) + (0 != (dipBankVal[CurDisplay] & 64));
+        DisplayDIP[4] = 10 * (0 != (dipBankVal[CurDisplay] & 64)) + (0 != (dipBankVal[CurDisplay] & 128));
         RPU_SetDisplayCredits(DisplayDIP[4], true, true);
       }
     }
 
     if (xDisplay < 4)  // set mask for flashing digit
-      RPU_SetDigitFlash(CurDisplay, CurDigit, DisplayDIP[CurDisplay], CurrentTime, 250);
+      RPU_SetDigitFlash(CurDisplay, 5 - CurDigit, DisplayDIP[CurDisplay], CurrentTime, 250);
     else
-      RPU_SetDigitFlashCredits(xDigit, CurrentTime, 250);
+      RPU_SetDigitFlashCredits(1 - xDigit, CurrentTime, 250);
 
   } else if (curState == MACHINE_STATE_TEST_SCORE_LEVEL_1) {  //                                             *** Set Score Level 1 ***
     if (curStateChanged) ShowScore1(CurrentTime);

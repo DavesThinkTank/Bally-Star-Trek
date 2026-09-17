@@ -1,5 +1,5 @@
 # Bally Star Trek 2026
-## Version 2026.06
+## Version 2026.08
 ## for the Arduino Mega 2560 Rev3
 
 Re-imagined rules for Bally's 1979 Star Trek pinball machine. Implemented using the Retro Pin Upgrade (RPU), using a daughter card connected to the MPU's J5 connector. The card can be built yourself using instructions available online. The following website can help you with this: 
@@ -9,9 +9,9 @@ An easier option is to purchase a kit, or even a pre-built card. Both are availa
 
 ### To use this code (more complete information is available in the manual):
 * Download this zip file (Code > Download ZIP) or clone the repository to your hard drive.
-* Unzip the ST2026p06 repository and make sure the parent folder is named: ST2026p06
+* Unzip the ST2026p08 repository and make sure the parent folder is named: ST2026p08
 * Download Arduino's IDE (Integrated Development Environment) from https://www.arduino.cc/en/software. And pay them a few bucks!
-* Find ST2026p06.ino in your ST2026p06 folder, and open it with the Arduino IDE. Compile and upload to an Arduino Mega 2560 microcontroller.
+* Find ST2026p08.ino in your ST2026p08 folder, and open it with the Arduino IDE. Compile and upload to an Arduino Mega 2560 microcontroller.
 * Attach the Arduino to the J5 connector of your Flash Gordon pinball's MPU board.
 * Sound files can be found at https://drive.google.com/drive/u/2/folders/1jDBnFHythNCg0qE2jMhNxCWICuR75obn
 * Copy and transfer the sound files to the micro SD card on your WAVTrigger.
@@ -21,11 +21,29 @@ Be sure to review all self-test game settings as they may have defaulted to zero
 
 ### How to operate self-test / audit / game settings
 - Inner coin door button: Enters self-test / audit mode and advances through sections
-- Outer coin door game button: Can be used to control and direct some tests. See the included file StarTrek2026-06manual.pdf for a full explanation of the self-tests and game settings available.
+- Outer coin door game button: Can be used to control and direct some tests. See the included file StarTrek2026-08manual.pdf for a full explanation of the self-tests and game settings available.
 - Any other switch: Some tests require the use of a second switch to modify values or move between options. See the included manual for more information.
 - Slam switch: The slam switch is located on the inside of the game door. It can be used to end a self-test session without going through all the tests. See the manual for more information.
 
 ### Version History
+### Version 2026.08 by Dave's Think Tank
+
+Changes / Additions:
+- Upgraded to RPU v5.14. Minor changes made to RPU.h and RPU_config.h to identify Star Trek requirements and previously added functionality. RPU.cpp modified
+  with previous changes to RPU_SetLampState() and RPU_ReadByteFromEEProm(), as well as including several functions written for Star Trek in previous versions. 
+  RPU_CycleAllDisplays() in v5.14 has been updated with the changes I made previously (display all 8s), and so my previous changes are not included. A minor 
+  change was required to SelfTestAndAudit.cpp, in the call to RPU_CycleAllDisplays().
+- RPU v5.14 reverses the direction of the display test. That is, scrolling through the display digits proceeds from left to right, rather than right to left, 
+  as it did previously. My DIP switch test has therefore also been rewritten to display from left to right. That is, the leftmost digit of each display is now the 
+  lowest digit of the corresponding DIP bank, and the rightmost digit is the highest. Scrolling through the digits also proceeds from left to right. This will
+  hopefully be easier to read and understand for most users.
+- The DIP switch test can now use either a double-click of the game button, or a single-click of any other switch, to change the value of a DIP switch.
+
+Bug Fixes:
+- Still working with Dick Hamill to resolve issue of occasional, erroneous, multiple switch reads! Extraneous calls to RPU_DataRead(0) were eliminated. Other
+  changes made to RPU by Hamill to prevent any possibility of interupts during switch reads.
+- Responsiveness of the self-test switch has been improved tremendously!
+
 ### Version 2026.06 by Dave's Think Tank
 
 Changes / Additions:
